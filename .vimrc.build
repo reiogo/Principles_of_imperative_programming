@@ -1,0 +1,18 @@
+call plug#begin('~/.vim/plugged')
+Plug 'leafgarland/typescript-vim'
+Plug 'pangloss/vim-javascript'
+ Plug 'chrisbra/csv.vim'
+Plug 'yuezk/vim-js'
+Plug 'maxmellon/vim-jsx-pretty'
+Plug 'honza/vim-snippets'
+Plug 'tpope/vim-fugitive'
+Plug 'morhetz/gruvbox'
+Plug 'tpope/vim-surround'
+Plug 'vim-scripts/dbext.vim'
+Plug 'kana/vim-textobj-user'
+Plug 'kana/vim-textobj-entire'
+Plug 'kien/ctrlp.vim'
+Plug 'bps/vim-textobj-python'
+Plug 'tpope/vim-commentary'
+Plug 'dense-analysis/ale'
+call plug#end()

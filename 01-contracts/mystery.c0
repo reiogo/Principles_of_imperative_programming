@@ -4,30 +4,168 @@
  * 15-122 Principles of Imperative Computation
  */
 
-// Specification function!
-int POW(int b, int e)
-//@requires e >= 0;
+int POW (int x, int y)
+//@requires y >= 0;
 {
-  if (e == 0) return 1;
-  return POW(b, e-1) * b;
+    if (y == 0)
+        return 1;
+    else
+        return x * POW(x, y - 1);
 }
 
-int f (int x, int y)
+int f(int x, int y) 
 //@requires y >= 0;
-//@ensures POW(x, y) == \result;
+//@ensures \result == POW(x,y);
 {
-  int b = x; /* Line 19 */
-  int e = y; /* Line 20 */
-  int r = 1; /* Line 21 */
-  while (e > 0) /* Line 22 */
-  //@loop_invariant e >= 0; /* Line 23 */
-  //@loop_invariant POW(b, e) * r == POW(x, y);
-  {
-    if (e % 2 == 1) { /* Line 26 */
-      r = b * r;      /* Line 27 */
+    int r = 1;
+    int b = x; // base
+    int e = y; // exponent
+
+    // till y is 1
+    while (e > 0) 
+    //@loop_invariant e >= 0;
+    //@loop_invariant r * POW(b,e) == POW(x,y);
+    {
+
+        // if odd
+        if (e % 2 == 1) {
+            r = b * r;
+        }
+        b = b * b;
+
+        //integer division
+        e = e / 2;
     }
-    b = b * b;        /* Line 29 */
-    e = e / 2;        /* Line 30 */
-  }
-  return r;
+    //@assert e == 0;
+    return r;
+}
+
+
+int foo(int x)
+//@requires x >= 0; 
+//@ensures \result == POW(2,x) - 1;
+{
+    int p = 0;
+    for (int i = 0; i < x; i++)
+   //@loop_invariant p == POW(2, i) - 1;
+   //@loop_invariant 0 <= i && i <= x;
+    {
+        p += POW(2, i);
+    }
+    return p;
+}
+
+
+
+// calculates the greatest common divisor of a and b
+// INIT show that d >= 1 initially 
+// A. a > 0 and b > 0 by pre-condition
+// B. a >= 1 and b >= 1 by math on A (both integers)
+// C. d == min (a, b) by line
+// D. min(a,b) >= 1 by math on B and C
+
+// PRES  show that d >= 1 on and arbitrary iteration
+// A. d > 1 by the loop guard
+// B. d' == d - 1 by line
+// C. d' >= 1 by math on A and B
+
+// EXIT show that d >= 1 and a and b are divisible by d
+// A. d <= 1 by loop guard
+// B. d == 1 by math on A and loop invariant
+// C. 1 divides all integers by math
+
+// TERM show that the loop terminates 
+// On an arbitrary interation the expression d always becomes smaller
+// until it becomes 1 where it breaks the loop guard and terminates
+
+// ...and that post conditions are satisfied on the exit in the loop
+// show that d >= 1 and a % d == 0 && b % d == 0 hold
+// A. d divides a and b by line 
+// B. d >= 1 by loop guard
+
+int GCD(int a, int b)
+//@requires a > 0 && b > 0;
+//@ensures \result >= 1;
+//@ensures a % \result == 0 && b % \result ==0;
+{
+    int d = min(a, b);
+    while(d > 1)
+    //@loop_invariant d >= 1;
+    {
+        if (a % d == 0 && b % d == 0)
+            return d;
+        d = d - 1;
+    }
+    return d;
+}
+
+
+// Gets GCD using euclids algorithm
+
+// Proof:
+// show calls to GCD are safe:
+    // show that a > 0 && b > 0 and show that x > 0 && y > 0
+    // A. x > 0 and y > 0 by loop invariant
+    // A. a > 0 and b > 0 by pre-condition
+
+// INIT - show x > 0 && y > 0 and GCD(x,y) == GCD(a,b) initially
+    // A. a > 0 && b > 0 by pre-condition
+    // B. x == a and y == b by line
+    // C. x >0 && b > 0 by math on A and B
+    // D. GCD(x,y) == GCD(a,b) by line B
+
+// PRES - show x' > 0 && y' > 0 and GCD(x',y') == GCD(a,b) during a loop
+// two cases: x > y and else
+// x > y:
+    // A. x' == x - y by line
+    // ?. x > y by assumption
+    // ?. GCD(x,y) == GCD(a,b) by assumption
+    // B. x - y > 0 by conditional x > y and math
+    // C. x' > 0 by math, A, and B
+    // D. y' = y by assignment (nothing happens to y)
+    // E. y' > 0 by line and D
+    // F. GCD(x', y') == GCD(a,b) by math, C, and D
+
+// else x < y
+    // A. y' = y - x by line 
+    // B. y - x > 0 by conditional and math
+    // C. y' > 0 by math
+    // D. x' = x by assignment
+    // E. x' > 0 by line and D
+    // F. GCD(x', y') == GCD(a,b) by math, C, and D
+
+// EXIT - show x == GCD(a,b);
+    // A. x == y by guard
+    // B. GCD(x,y) == GCD(a,b) by loop invariant
+    // C. GCD(x,x) == GCD(a,b) by A
+    // D. x == GCD(a,b) by C
+
+// TERM
+// On an arbitrary loop |x-y| 
+// becomes smaller until x == y, where the loop breaks and terminates.
+// During an arbitrary loop -> x + y is strictly decreasing, and can 
+// can never be smaller than 2. That x + y is strictly decreasing
+// relies on x and y being positive and if x > y then x+y is x and 
+// if it is x < y then x+y is y. Both are strictly smaller than x + y.
+// The lower bound is a consequence of the first invariant
+ 
+int euclid (int a, int b)
+//@requires a > 0 && b > 0;
+//@ensures \result == GCD(a, b);
+{
+    int x = a;
+    int y = b;
+
+    while (x != y)
+    //@loop_invariant x > 0 && y > 0;
+    //@loop_invariant GCD(x, y) == GCD(a, b);
+    {
+        if (x > y)
+            x = x - y;
+        else 
+            y = y - x;
+    }
+    //@assert x == y;
+    return x;
+       
 }

@@ -133,6 +133,7 @@ call plug#end()
 
 
 syntax enable
+set background=dark
 colorscheme gruvbox
 " if strftime ('%H') > 22 
 "     colorscheme gruvbox
@@ -292,3 +293,9 @@ autocmd FileType javascript setlocal shiftwidth=2 tabstop=2 expandtab softtabsto
 " ocaml compatibility --------  
 set rtp^="/home/reiro/.opam/default/share/ocp-indent/vim"
 
+"Treat .c0 files as C --------
+augroup c0_files
+    autocmd!
+    autocmd BufRead,BufNewFile *.c0 setfiletype c
+    autocmd FileType c let b:ale_enabled = 0
+augroup END

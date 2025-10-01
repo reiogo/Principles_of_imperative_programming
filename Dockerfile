@@ -2,12 +2,15 @@ FROM debian:stable-slim
 
 # Install dependencies
 RUN apt update && apt install -y \
+    ncurses-term \
     wget \
     curl \
     git \
-    vim-runtime \
     tmux \
     vim
+
+# Set terminal environment variable for proper color detection
+ENV TERM=xterm-256color
 
 # Download and install compiler
 WORKDIR /cc0
@@ -24,3 +27,6 @@ COPY .vimrc.build /root/.vimrc
 RUN vim +PlugInstall +qall
 
 COPY .vimrc /root/.vimrc
+
+# # copy tmux config to ensure 256-color support
+# COPY .tmux.conf /root/.tmux.conf

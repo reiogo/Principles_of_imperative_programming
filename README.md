@@ -1,6 +1,7 @@
 # Principles_of_imperative_programming
 CMU's CS15122 course on C and imperative programming
 
+Using CMU's interpreter: coin, or compiling the program with CMU's compiler: cc0.
 
 ### Docker Commands
 Build the image:

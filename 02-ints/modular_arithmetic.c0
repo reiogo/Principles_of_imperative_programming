@@ -1,0 +1,17 @@
+string foo (int x){
+    int z = 1 + x;
+    if (x+1 == z)
+        return "Good";
+    else 
+        return "Bad";
+}
+
+string bar (){
+    int z = int_min();
+    int x = int_max();
+    if (z-1 > x+1)
+        return "Strange, but right";
+    else 
+        return "wrong";
+}
+

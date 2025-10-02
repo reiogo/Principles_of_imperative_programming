@@ -1,4 +1,3 @@
-" --------
 "  Vim Plug
 "  -------
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
@@ -133,7 +132,10 @@ call plug#end()
 
 
 syntax enable
+
 set background=dark
+set t_Co=256
+
 colorscheme gruvbox
 " if strftime ('%H') > 22 
 "     colorscheme gruvbox

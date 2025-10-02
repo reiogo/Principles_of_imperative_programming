@@ -1,0 +1,35 @@
+string clear_red(int p) {
+    return int2hex(p & 0xFF00FFFF);
+}
+
+string make_red (int p){
+    return int2hex(p & 0xFFFF0000);
+}
+
+string opacify(int p) {
+    return int2hex(p | 0xFF000000);
+}
+
+string franken_pixel(int p, int q) {
+    int p_green = p & 0x0000FF00;
+    int q_others = q & 0xFFFF00FF;
+    return int2hex(p_green | q_others);
+}
+
+string invert(int p){
+    return int2hex((p & 0xFF000000) | (~p & 0x00FFFFFF));
+}
+
+string blue_everywhere(int p){
+    int alpha = p & 0xFF000000;
+    int blue = p & 0x000000FF;
+    return int2hex(alpha | (blue << 16) | (blue << 8) | blue);
+}
+
+string swap_alpha_red(int p) {
+   int new_alpha  =  (p << 8) & 0xFF000000;
+   int new_red    =  (p >> 8) & 0x00FF0000;
+   int green_blue =  (p & 0x0000FFFF);
+   int res = (new_alpha | new_red | green_blue);
+   return int2hex(res);
+} 

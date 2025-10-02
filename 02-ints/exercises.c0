@@ -1,0 +1,76 @@
+#use <util>
+
+// gets the quotient of integer division x/y tending towards -inf
+int quot (int x, int y)
+//@requires y > 0 && !(x == int_min() && y == -1);
+{
+   int q = x/y; 
+
+   if (x*y < 0){
+        q = q - 1;
+    }
+
+    return q;
+}
+int quotcmu(int x, int y){
+    int q = x/y;
+    if ( q < 0 && x%y !=0){
+        q = q-1;
+    }
+    return q;
+}
+
+// gets the remainder of integer division
+int rem (int x, int y)
+//@requires y > 0 && (x != int_min() && y != -1);
+//@ensures quot(x,y)*y + \result == x;
+{
+    int res = x - (quot(x, y) * y);
+    return res;
+}
+
+string int2hex(int x){
+    return "";
+}
+
+string hex_digit2string(int d){
+    if (d == 1) return "1";
+    if (d == 2) return "2";
+    if (d == 3) return "3";
+    if (d == 4) return "4";
+    if (d == 5) return "5";
+    if (d == 6) return "6";
+    if (d == 7) return "7";
+    if (d == 8) return "8";
+    if (d == 9) return "9";
+    if (d == 10) return "A";
+    if (d == 11) return "B";
+    if (d == 12) return "C";
+    if (d == 13) return "D";
+    if (d == 14) return "E";
+    if (d == 15) return "F";
+    if (d == 16) return "";
+}
+
+
+int test(){
+    assert(quot(-1, 5) == -1);
+    assert(quot(-3, 2) == -2);
+    assert(quot(-1, 2) == -1);
+    assert(quot(1, 2) == 0);
+    assert(quot(3, 2) == 1);
+
+
+    assert(rem(-1, 5) == 4 );
+    assert(rem(-3, 2) == 1);
+    assert(rem(-1, 2) == 1);
+    assert(rem(1, 2) == 1);
+    assert(rem(3, 2) == 1);
+
+    assert(int2hex(1) == "1");
+    assert(int2hex(16) == "F");
+    assert(int2hex(17) == "11");
+    assert(int2hex(31) == "1F");
+
+    return 0;
+}

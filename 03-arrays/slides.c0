@@ -1,0 +1,38 @@
+#use <util>
+
+int[] array_copy(int[] A, int n)
+//@requires n == \length(A);
+//@ensures \length(\result) == n;
+{
+    int[] B = alloc_array(int, n);
+    for (int i = 0; i < n; i++)
+        //@loop_invariant 0 <= i;
+    {
+        B[i] = A[i];
+    }
+    return B;
+}
+
+int main(){
+    int[] I = alloc_array(int, 3);
+    I[0] = 5; I[1] = 6; I[2] = 7;
+
+    int[] J = array_copy(I, 3);
+    return 0;
+}
+
+int[] cubes(int n) 
+//@requires n >= 0;
+//@ensures n == \length(\result);
+{
+    int[] A = alloc_array(int, n);
+
+    for (int i = 0; i < n; i++)
+    //@loop_invariant 0 <= i;
+    {
+        A[i] = i * i * i;
+    }
+    return A;
+}
+
+

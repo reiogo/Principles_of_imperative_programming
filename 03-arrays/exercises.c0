@@ -1,0 +1,20 @@
+#use <util>
+
+// Exercise 1 ===========================================================
+
+// makes an array from lo to hi of A
+int[] array_part (int[] A, int lo, int hi)
+    //@requires hi >= lo;
+    //@requires (hi - lo) <= \length(A);
+{
+
+    int[] B = alloc_array(int, hi - lo);
+
+    for (int i = lo; i < hi; i++)
+    //loop_invariant lo <= i && i <= hi;
+    {
+        B[i] = A[i];
+    }
+
+    return B;
+}

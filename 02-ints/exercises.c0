@@ -1,5 +1,7 @@
 #use <util>
 
+// exercise 1 =================================================
+
 // gets the quotient of integer division x/y tending towards -inf
 int quot (int x, int y)
 //@requires y > 0 && !(x == int_min() && y == -1);
@@ -28,12 +30,12 @@ int rem (int x, int y)
     int res = x - (quot(x, y) * y);
     return res;
 }
+// exercise 2 =================================================
 
-string int2hex(int x){
-    return "";
-}
-
-string hex_digit2string(int d){
+string hex_digit2string(int d)
+//@requires 0<=d && d<=15;
+{
+    if (d == 0) return "0";
     if (d == 1) return "1";
     if (d == 2) return "2";
     if (d == 3) return "3";
@@ -49,17 +51,141 @@ string hex_digit2string(int d){
     if (d == 13) return "D";
     if (d == 14) return "E";
     if (d == 15) return "F";
-    if (d == 16) return "";
+    assert(false);
+    return "";
+}
+
+/* string my_int2hex(int x){ */
+/*     if (x == 0){ */
+/*         return ""; */
+/*     } else { */
+/*         return string_join( */
+/*                 my_int2hex(x >> 4), */
+/*                 hex_digit2string ((x & 0x0000000F))); */
+/*     } */
+/* } */
+string my_int2hex(int x)
+{
+    string res = "";
+    int a = x;
+    for (int i = 0; i < 8; i++)
+    //@loop_invariant 0 <= i && i <= 8;
+    {
+        int tmp = a & 0xF;
+        res = string_join(hex_digit2string(tmp), res);
+        a = a >> 4;
+    }
+    return res;
+}
+
+// exercise 3 =================================================
+
+// right shift, but with the leading zeros being 0
+int lsr(int x, int shiftamount)
+//@requires 0<=shiftamount && shiftamount <= 31;
+{
+    int tmp = x >> shiftamount;
+    int mask = int_max() >> (shiftamount - 1);
+    int res = tmp & mask;
+    return res;
+}
+
+
+// exercise 4 =================================================
+// add overflow errors to these functions
+
+int POW (int x, int y)
+//@requires y >= 0;
+{
+    if (y == 0)
+        return 1;
+
+    int rec = POW(x, y - 1);
+    if (int_max()/rec < x)
+        error ("Overflow");
+    else
+        return x * rec;
+}
+
+int f(int x, int y) 
+//@requires y >= 0;
+//@ensures \result == POW(x,y);
+{
+    int r = 1;
+    int b = x; // base
+    int e = y; // exponent
+
+    // till y is 1
+    while (e > 0) 
+    //@loop_invariant e >= 0;
+    //@loop_invariant r * POW(b,e) == POW(x,y);
+    {
+
+        // if odd
+        if (e % 2 == 1) {
+            if (int_max()/b < r)
+                error("Overflow: r");
+            r = b * r;
+        }
+        if (int_max()/b < b)
+            error("Overflow: b");
+        b = b * b;
+
+        //integer division
+        e = e / 2;
+    }
+    //@assert e == 0;
+    return r;
+}
+
+// exercise 5 =================================================
+
+/* ~(x & ~y) | (y | x) and 0xFFFFFFFF */
+/* always true */
+
+/* (x ^ y) ^ (y ^ x) ^ x and x ^ y */
+/* x = 0000 and y = 0001 */
+
+/* ((x >> 16) << 16) == x & 0xFFFF0000 */
+/* always true */
+
+bool testbinary(int x, int y){
+    /* return ((x ^ y) ^ (y ^ x) ^ x) ==  (x ^ y); */
+    return ((x >> 16) << 16) == (x & 0xFFFF0000);
+
+}
+
+// exercise 6 =================================================
+
+string opacify(int x){
+    int res = x | 0xFF000000; 
+    return int2hex(res);
+}
+
+// exercise 7 =================================================
+
+string pixel_by_half(int p) {
+    int alpha = ((p >> 24) & 0x000000FF) /2;
+    int red   = ((p >> 16) & 0x000000FF) /2;
+    int green = ((p >> 8) &  0x000000FF) /2;
+    int blue  = (p &         0x000000FF) /2;
+    return int2hex(alpha << 24 | red << 16 | green << 8 | blue);
 }
 
 
 int test(){
-    assert(quot(-1, 5) == -1);
-    assert(quot(-3, 2) == -2);
-    assert(quot(-1, 2) == -1);
-    assert(quot(1, 2) == 0);
-    assert(quot(3, 2) == 1);
+    assert(string_compare(pixel_by_half(0x88888888), "44444444") == 0);
+    assert(string_compare(pixel_by_half(0xFFFFFFFF), "7F7F7F7F") == 0);
 
+    assert(string_compare(opacify(0xb3735af9), "FF735AF9") == 0);
+
+    assert(lsr(-1, 1) == int_max());
+    assert(lsr(int_min() + 2 , 1) == (1 | 1 << 30));
+
+    assert(string_compare(my_int2hex(1),"00000001") == 0);
+    assert(string_compare(my_int2hex(16),"00000010")== 0);
+    assert(string_compare(my_int2hex(17),"00000011")== 0);
+    assert(string_compare(my_int2hex(31),"0000001F")== 0);
 
     assert(rem(-1, 5) == 4 );
     assert(rem(-3, 2) == 1);
@@ -67,10 +193,13 @@ int test(){
     assert(rem(1, 2) == 1);
     assert(rem(3, 2) == 1);
 
-    assert(int2hex(1) == "1");
-    assert(int2hex(16) == "F");
-    assert(int2hex(17) == "11");
-    assert(int2hex(31) == "1F");
+    assert(quot(-1, 5) == -1);
+    assert(quot(-3, 2) == -2);
+    assert(quot(-1, 2) == -1);
+    assert(quot(1, 2) == 0);
+    assert(quot(3, 2) == 1);
+
+
 
     return 0;
 }

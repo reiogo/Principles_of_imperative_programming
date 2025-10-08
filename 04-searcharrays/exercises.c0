@@ -1,4 +1,124 @@
 #use <util>
 
-// Exercise 1   
-//
+// Exercise 1 ============================================================================
+
+// Finds index of maximum element in a non-empty, unsorted array of integers
+int find_max(int[] A, int n)
+//@requires n == \length(A) && n > 0;
+//@ensures 0 <= \result && \result < \length(A);
+{
+    int max_index = 0;
+    int max_num = A[0];
+
+    for (int i = 1; i < n; i++)
+    //@loop_invariant 1 <= i && i <= n;
+    {
+        if (A[i] > max_num){
+            max_index = i;
+            max_num = A[i];
+        }
+    }
+    return max_index;
+}
+
+// 1. Which line guarantees that line [int max_num = A[0]] is safe:
+//   A. The prereq that n > 0 means that A has at least one element
+// 2. Which line guarantees line [if (A[i] > max_num)]
+//   A. The loop invariant to show i is non-negative; the guard to show 
+//   that i is less than n, which is shown by prereq that n is the length of the array
+// 3. What will A = [5, 5, 5, 5, 5], and find_max(A,4) return
+//   A. Will find the first max value which is 0
+// 4. What will B = [1, 3, 2, 3, 1], and find_max(B,5) return
+//   A. Will find the first so 1
+// 5. Add a post condition for a user to safely use this function
+// Describe a postcondition that assures the function achieves the desired outcome
+//   A. Every other element in the array is less than or equal to the element at 
+//   array[\result]
+
+// Exercise 2 ============================================================================
+
+// Process A(n) and map to B(2n)
+// A = [1,2,3] -> B = [1, 1, 2, 2, 3, 3]
+void doubling (int[] A, int[] B, int n)
+//@requires n <= int_max() / 2;
+//@requires \length(A) == n && \length(B) == 2*n;
+{
+    for (int i = 0; i < n; i++)
+    //@loop_invariant 0 <= i && i <= n;
+    {
+        B[2*i] = A[i];
+        B[2*i + 1] = A[i];
+    }
+}
+
+// 1. Why is the first precondition not useful? Rewrite it.
+//   A. Because the modular arithmetic on n*2 will make it wrap around anyways,
+//   which is probably isn't what we're looking for.
+// 2. prove the safety of the array access of B[2*i+1] 
+// From the soltions:
+//   a. i < n by guard
+//   b. i <= n - 1 by math on a
+//   c. 2*(n - 1) + 1 <= int_max() by precondition
+//   d. 2*i + 1 <= 2*(n - 1) + 1 by math on b c
+//   e. <= 2*n - 1 by math on d 
+//   f. < 2*n by math on e
+//   g. \length(B) == 2*n by precondition
+//   h. 2*i + 1 < \length(B) by math on f and g
+//   i. 0 <= i by loop invariant
+//   j. 0 <= 2i + 1 by math on i and a
+
+// Exercise 3 ============================================================================
+
+// Specification function for checking if x is in A (from lo to hi)
+bool is_in(int x, int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+{
+    for (int i = lo; i < hi; i++)
+    //@loop_invariant lo <= i && i <= hi;
+    {
+        if (A[i] == x) return true;
+    }
+    return false;
+}
+
+
+// searches for x in portions of A between lo inclusive and hi exclusive
+int search (int x, int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+/*@ensures (\result == -1 && !is_in(x, A, lo, hi))
+       || (lo <= \result && \result < hi && A[\result] == x);
+ @*/
+{
+    for (int i = lo; i < hi; i++)
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant !is_in(x, A, lo, i);
+    {
+        if (A[i] == x)
+            return i;
+    }
+    //@assert !is_in(x,A,lo,hi);
+    return -1;
+}
+
+// 1. Prove that the post condition is correct when exiting from if (A[i] == x) return i;
+//   A. show that when A[i] == x then lo <= i && i < hi && A[i] == x
+//      a. lo <= i by loop invariant
+//      b. i < hi by loop guard
+//      c. A[i] == x by conditional
+//      d. lo <= i && i < hi && A[i] == x by a, b, and c
+//   Solution's version:
+//      a. lo <= i by loop invariant
+//      b. \result == i by return statement
+//      c. lo <= \result by math on a and b
+//      d. i < hi by loop guard
+//      e. \result < hi by math on b and c
+//      f. A[i] == x by line
+//      g. A[\result] == x by math on f and b
+//      h. (lo <= \result && \result < hi && A[\result] == x) by c, e, and g
+
+// 2. Prove that the assertion will hold 
+//   A. show that !is_in(x,A,lo,hi)
+//      a. i >= hi by guard being false
+//      b. i <= hi by loop invariant
+//      c. i == hi by math on a and b
+//      d. !is_in(x,A,lo,hi) by loop invariant and c

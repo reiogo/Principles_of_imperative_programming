@@ -2,19 +2,260 @@
 
 // Exercise 1 ===========================================================
 
+bool seg_equals_attempt1(int[] A, int al, int ar,
+                int[] B, int bl, int br)
+//@requires (ar - al) == (bl - br);
+//@requires ar > al && br > bl;
+//@requires ar < \length(A) && br < \length(B);
+{
+    for (int i = 0; i < (ar - al); i++)
+    ////@loop_invariant seg_equals(A,0,i,B,0,i);
+    //@loop_invariant 0 <= (i + al) && (i + al) < \length(A);
+    //@loop_invariant 0 <= (i + bl) && (i + bl) < \length(B);
+    {
+        if (A[i + al] != B[i + bl]){
+            return false;
+        }
+    }
+    return true;
+}
+
+// specification function for comparing segments of an array
+bool seg_equals(int[] A, int loA, int hiA,
+        int[] B, int loB, int hiB)
+//@requires 0 <= loA && loA <= hiA && hiA <= \length(A);
+//@requires 0 <= loB && loB <= hiB && hiB <= \length(B);
+//@requires (hiA - loA) == (hiB - loB);
+{
+    int i = loA;
+    int j = loB;
+    while (i < hiA)
+    //@loop_invariant loA <= i && i <= hiA;
+    //@loop_invariant loB <= j && j <= hiB;
+    //@loop_invariant hiA - i == hiB - j;
+    {
+        //@assert j < hiB;
+        if (A[i] != B[j])
+            return false;
+        i++;
+        j++;
+    }
+    return true;
+}
+// Proof =====================================================
+
+//INIT
+// show loA <= i && i <= hiA initially;
+//  a. i = loA by line;
+//  b. loA <= loA by math on a;
+//  c. loA <= i by a and b;
+//  d. loA <= hiA by requirement
+//  e. i <= hiA by math and c
+//  f. loA <= i && i <= hiA by c and e and math
+// show loB <= j && j <= hiB initially
+//  a. j = loB by line
+//  c. loB <= j by math on a
+//  d. loB <= hiB by requirement
+//  e. j <= hiB by a and d
+//  f. loB <= j && j <= hiB
+// show hiA - i == hiB - j initially
+//  a. i = loA by line
+//  b. j = loB by line
+//  e. hiA - loA == hiB - loB by requirement
+//  f. hiA - i == hiB - j by a, b and e
+
+//ASSERTION
+// show that j < hiB (assuming the loop invariants are valid)
+//  a. i < hiA by loop guard
+//  b. hiA - i > 0 by math on a
+//  c. hiA - i == hiB - j by loop invariant
+//  d. hiB - j > 0 by math on b and c
+//  e. j < hiB by math on d
+
+// PRES
+// show if loA <= i && and i <= hiA then loA <= i' && and i' <= hiA
+//  a. i' = i + 1 by line
+//  b. loA <= i by assumption
+//  c. i < hiA by loop guard
+//  d. loA <= i + 1 by math on b and c
+//  e. i + 1 <= hiA by math
+//  f. loA <= i + 1 && i + 1 <= hiA by math, c, and d
+//  g. loA <= i' && i' <= hiA by a and f
+// show that if loB <= j && j <= hiB then loB <= j' && j' <= hiB
+//  a. j' = j + 1  by line
+//  b. loB <= j by assumption
+//  c. j < hiB by assertion
+//  d. loB <= j + 1 by math on b and c
+//  e. j + 1 <= hiB by math c
+//  f. loB <= j' && j' <= hiB by a, d, and e
+// show that if hiA - i == hiB - j then hiA - i' == hiB - j'
+//  a. i' = i + 1 by line
+//  b. j' = j + 1 by line
+//  c. hiA - (i + 1) == hiB - (j + 1) by math
+//  d. hiA - i' == hiB - j' by math and a,b, and c
+
+// term: on an arbitrary loop, hiA - i is strictly decreasing
+// (because i is incremented while hiA is constant), and
+// can never become smaller than 0 (because i < hiA, or i == hiA).
+// The loop guard is false when hiA - i == 0
+//  =====================================================
+
+
 // makes an array from lo to hi of A
 int[] array_part (int[] A, int lo, int hi)
-    //@requires hi >= lo;
+    //@requires hi > lo;
     //@requires (hi - lo) <= \length(A);
+    //@ensures seg_equals(A, lo, hi, \result, 0, (hi - lo));
 {
 
     int[] B = alloc_array(int, hi - lo);
 
     for (int i = lo; i < hi; i++)
-    //loop_invariant lo <= i && i <= hi;
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant seg_equals(A, lo, i, B, 0, (i - lo));
     {
-        B[i] = A[i];
+       B[i - lo] = A[i];
     }
 
     return B;
 }
+
+// Proof =====================================================
+
+//INIT
+// show that lo <= i && i <= hi initially;
+//  a. i = lo by line
+//  b. lo <= i by a
+//  c. lo < hi by requirement
+//  d. i <= hi by a and c
+// show that seg_equals(A, lo, i, B, 0, (i - lo)) initially
+//  a. i = lo by line
+//  b.  lo - lo == 0 by math on a
+//  b. seg_equals(A, lo, lo, B, 0, 0) by a and b
+
+//PRES
+// show that if lo <= i && i <= hi  then lo <= i' && i <= hi 
+//  a. i' = i + 1 by line, 
+//  b. lo <= i by assumption 
+//  c. i < hi by guard
+//  d. lo <= i + 1 by math on b and c
+//  e. i + 1 <= hi by math on d
+//  f. lo <= i' && i' <= hi by f and h
+// show that if seg_equals(A, lo, i, B, 0, (i - lo)) then 
+// seg_equals(A, lo, i', B, 0, (i' - lo)) 
+//  a. i' = i + 1 by line
+//  b. B[i - lo] = A[i] by line
+//  c. B[i + 1 - lo] = A[i + 1] by math, a and b
+//  d. seg_equals(A, i, (i + 1), B, (i - lo), (i + 1 - lo)) by b and c
+//  e. seg_equals(A, lo, (i + 1), B, 0, (i + 1 - lo)) by d and assumption
+//  f. seg_equals(A, lo, i', B, 0, (i' - lo)) 
+
+// term: During an arbitrary iteration of the loop, hi - i strictly decreases
+// (as i increments and hi is a constant) and cannot be less than 0.
+// The loop guard is false at hi - i == 0.
+ 
+// exit: show that if seg_equals(A, lo, i, B, 0, (i - lo)), i >= hi
+// then seg_equals(A, lo, hi, B, 0, (hi - lo))
+// a. i >= hi by guard
+// b. i <= hi by loop invariant
+// c. i == hi by math on a and b
+// d. seg_equals(A, lo, hi, B, 0, (hi - lo)) 
+
+// =====================================================
+
+// copy a segment of source into target
+// return the last position of the the target array or -1 if none exists
+int copy_into(int[] source, int i, int n, int[] target, int j)
+//@requires n >= 0;
+//@requires 0 <= i && i <= i + n && i + n <= \length(source);
+//@requires 0 <= j && j <= j + n && j + n <= \length(target);
+//@ensures seg_equals(source, i, i + n, target, j, j + n);
+//@ensures \result == -1 || (0 <= \result  && \result < j + n);
+{
+    int res = -1;
+
+    for (int x = 0; x < n; x++)
+    //@loop_invariant 0 <= x && x <= n;
+    //@loop_invariant seg_equals(source, i, i + x, target, j, j+x);
+    {
+        target[j + x] = source[i + x];
+        res = j + x - 1;
+    }
+
+    return res;
+}
+
+// Proof ==========================================================================
+//INIT
+// show that 0 <= (j+x) && (j+x) <= \length(target) initially
+//  a. x = 0 by line
+//  b. 0 <= j by prereq
+//  c. 0 <= j + x by math on a and b
+//  d. j <= \length by prereq
+// show that 0 <= (i+x) && (i+x) <= \length(source) initially
+//  a. x = 0 by line
+//  b. 0 <= i by prereq
+//  c. 0 <= i + x by math on a and b
+//  d. i <= \length by prereq
+// show that 0 <= x && x <= n
+//  a. x = 0 by line
+//  b. 0 <= n by prereq
+// show that seg_equals(source, i, i + x, target, j, j + x) initially
+//  a. x = 0 by line
+//  b. i - i == 0 by math
+//  c. j - j == 0 by math
+//  d. seg_equals(source, i, i, target, j, j) by a, b, c
+
+//PRES
+// show that if 0 <= (j+x) && (j+x) <= \length(target) 
+// then 0 <= (j+x') && (j+x') <= \length(target) initially
+//  a. x' = x + 1 by line
+//  b. x < n by guard
+//  c. 0 <= j + x + 1 by math on a and b (b shows not int_max)
+//  d. j + n <= \length(target) by prereq
+//  e. j + x < j + n <= \length(target) by b and d
+//  f. j + x + 1 <= \length by e
+//  g. 0 <= (j+x') && (j+x') <= \length(target) by c and f
+// show that if 0 <= (i+x) && (i+x) <= \length(source) 
+// then 0 <= (i+x') && (i+x') <= \length(source) 
+//  a. x' = x + 1 by line
+//  b. x < n by guard
+//  c. 0 <= i + x + 1 by math on a and b (b shows not int_max)
+//  d. i + n <= \length(source) by prereq
+//  e. i + x < j + n <= \length(source) by b and d
+//  f. i + x + 1 <= \length by e
+//  g. 0 <= (i+x') && (i+x') <= \length(source) by c and f
+// show that if 0 <= x && x <= n then 0 <= x' && x' <= n
+//  a. x' = x + 1 by line
+//  b. 0 <= x  by assumption
+//  c. x < n by guard
+//  d. 0 <= x + 1 by math on b, c
+//  e. x + 2 <= n by math on c
+// show that if seg_equals(source, i, i + x, target, j, j + x) 
+// then seg_equals(source, i, i + x', target, j, j + x') 
+//  a. x' = x + 1 by line
+//  b. target[j + x] = source[i + x] by line
+//  b. seg_equals(source, i, i + x', target, j, j + x') by assumption and b
+
+
+//TERM
+// for an arbitrary iteration of the loop, n - x is strictly decreasing
+// (as x is incrementing and n is a constant) and cannot be less than 0.
+// The loop guard is false when n - x == 0
+
+//EXIT
+// when the loop guard is false: x >= n
+// and loop invariants are true: seg_equals(source, i, i + x, target, j, j + x) 
+// then show that seg_equals(source, i, i + n, target, j, j + n) 
+//  a. x >= n by loop guard being false
+//  b. x <= n by loop invariant
+//  c. x == n
+//=================================================================================
+
+int f(int[] A){
+    return 0;
+}
+int test(){
+    return 0;
+}
+

@@ -1,0 +1,89 @@
+#use <util>
+
+//Exercise 1 ==========================================================
+
+// Big O notation of the following:
+// My first guess is O(n^2)
+// for every value of i from 0 to n
+// calculate something for every value of j from 0 to n
+
+int function1 (int[] A, int n)
+//@requires n == \length(A);
+{
+    int count = 0;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j__){
+            count = count + A[j] * (i-1);
+        }
+    }
+    return count
+}
+
+// while this looks like it's going to be O(n^2) 
+// I have a feeling it's supposed to not be so
+// The answer is O(1);
+// the loops are only processing on k which is a constant
+// so the time complexity only rely on the constant growth
+
+
+int function2(int[] A, int n)
+//@requires (n == \length(A));
+{
+    int count = n;
+    int k = 5;
+    for (int i = 0; i < k; i++){
+        for (int j = 0; j < k; j++){
+            count = count + i * (j+1);
+        }
+    }
+    return count;
+}
+
+//Exercise 2 ==========================================================
+
+// give simplest tightest bounds of the following
+//   1. f(x) = 3*x^4 + x^(1/2) + 10
+//     A. O(x^4)
+//   2. 10*x^2 + 3y
+//     A. O(x^2 + y)
+//   3. 2^n + 2^n
+//     A. O(2^n)
+//   4. m*log(n) + n*log(n);
+//     A. O((m+n)*log(n))
+//   5. max(x,y) + 3y + 10
+//     A. O(max(x,y)+ y)
+//     Solution: This one was wrong its supposed to be O(max(x,y)) 
+//     which in hindsight does make sense
+//   6. min(x,y)
+//     A. O(min(x,y))
+
+//Exercise 3 ==========================================================
+
+// Prove O(max(x,y)) = O(x+y) for integers 0 <= x && 0 <= y
+// Hint: to show O(f) = O(g) show f is in the set of O(g) and g is in the set of O(f)
+// Define f as f(x,y) = max(x,y) and g as g(x,y) = x + y
+
+// Show that f is in O(g) 
+// case 1, x > y:
+//  a. f(x,y) = x by assumption
+//  b. x <= c(x+y)
+//  c. if c == 1 then x <= x+y by assumption (x and y are non-neg)
+// case 2, x < y:
+//  a. f(x,y) = y by assumption 
+//  b. x <= c(x+y)
+//  c. if c == 1 then x <= x+y by assumption
+
+// Show that g is in O(f)
+// case 1, x > y:
+//  a. f(x,y) = x by assumption
+//  b. x+y <= cx
+//  c. x+y <= 2x by math on assumption (x > y)
+//  d. if c == 2 then x+y <= 2x 
+// case 2, x < y:
+//  a. f(x,y) = y by assumption
+//  b. x+y <= cy
+//  c. x+y <= 2y by math on assumption (x < y)
+//  d. if c == 2 then x+y <= 2y 
+
+

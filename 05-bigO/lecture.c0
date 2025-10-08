@@ -1,0 +1,48 @@
+#use <util>
+
+// find the index of the minimum element in A
+// between [lo, hi)
+int find_min(int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures lo <= \result && \result <= hi;
+//@ensures le_seg(A[\result], A, lo, hi);
+{
+    int min_index = lo;
+    int min_num = A[lo];
+
+    for (int i = lo; i < hi; i++)
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant le_seg(min_num, A, lo, i);
+    {
+        if (A[i] < min_num){
+            min_index = i;
+            min_num = A[i];
+        }
+    }
+
+    return min_index;
+}
+
+void sort(int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A, lo, hi);
+{
+    for (int i = lo; i < hi; i++)
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant is_sorted(A, lo, i);
+    //@loop_invariant le_segs(A,lo,i,A,i,hi);
+    {
+        int min_index = find_min(A, i, hi);
+        swap(A, i, min_index);
+    }   
+}
+
+
+int test(){
+    // find_min
+    int[] A = alloc_array(int, 3);
+    A[0] = -1; A[1] = 0; A[2] = 1;
+    assert(find_min (A, 0, 3) == 0);
+
+    return 0;
+}

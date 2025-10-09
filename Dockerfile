@@ -27,6 +27,3 @@ COPY .vimrc.build /root/.vimrc
 RUN vim +PlugInstall +qall
 
 COPY .vimrc /root/.vimrc
-
-# # copy tmux config to ensure 256-color support
-# COPY .tmux.conf /root/.tmux.conf

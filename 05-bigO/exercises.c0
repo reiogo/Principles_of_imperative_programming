@@ -13,11 +13,11 @@ int function1 (int[] A, int n)
     int count = 0;
     for (int i = 0; i < n; i++)
     {
-        for (int j = 0; j < n; j__){
+        for (int j = 0; j < n; j++){
             count = count + A[j] * (i-1);
         }
     }
-    return count
+    return count;
 }
 
 // while this looks like it's going to be O(n^2) 
@@ -86,4 +86,113 @@ int function2(int[] A, int n)
 //  c. x+y <= 2y by math on assumption (x < y)
 //  d. if c == 2 then x+y <= 2y 
 
+//Exercise 4 ==========================================================
 
+// Prove that O(log(n!)) = O(nlog(n))
+
+// Show that log(n!) is in the set of O(nlog(n))
+// -> There exist n0 >= 0 such that for all n0 >= n, f(n) <= cg(n)
+//  a. log(n!)/ log(n) <= cn
+//  b. logn! is sum of log(n - k) from k = 0 ~ n by log rules
+//  c. logn! is n - k times n times hence
+//  d. logn! <= nlogn
+
+// Show that nlog(n) is in the set of log(n!)
+// -> There exists n0 >= 0 such that for all n0 >= n, g(n) <= cf(n) 
+//  a. nlogn <= clogn!
+//  b. nlogn is logn + logn ... for n times
+//  c. nlogn - logn! is logn - log(n-k) for every k
+//  e. show there exists a constant c  where sum(k=0 to n) of logn - log(n-k) <= clogn! - logn!
+//  f. log(n/(n-0)) + log(n/(n-1)+... 
+//  g. log(n/(n-0) * n/(n-1) ...)
+//  h. log(n^2/n!) <= clogn! - logn!
+//  i. logn^2 - logn! <= clogn! - logn!
+//  j. logn^2 <= clogn!
+//  k. logn^2/logn! <= c
+//  l. log base (n!) n^2 <= c
+
+
+//Exercise 5 ==========================================================
+
+// already sorted part 2,3,4 and not yet sorted part 9,8,6,7,5
+// 1. how many comparison to the next sorted number
+//   A. 9-8, 8-6,6-7,6-5
+//   4 comparisons, 1 swaps
+// 2. in the next?
+//   A. next has 2,3,4,5 and 8,6,7,9
+//   8-6, 6-7, 6-9
+//   3 comparisons, 1 swap
+// 3. Total comparison and total swaps
+//   A. 7 + 6 + 5 ... +1 which is 8*7/2 = 28 comparisons
+//   8 swaps 1 swap per element
+   
+//Exercise 6 ==========================================================
+
+// Does the insertion action from insertion_sort
+// from lo(inc) to i(exc) using A[i-1] as the inserted element
+void rearrange(int[] A, int lo, int i)
+//@requires 0 <= lo && lo <= i && i <= \length(A);
+//@requires is_sorted(A,lo,i-1);
+//@ensures is_sorted(A,lo,i);
+{
+    for(int j = i - 1; j > lo; j--)
+    //@loop_invariant lo <= j && j < i;
+    //@loop_invariant is_sorted(A,lo,j);
+    //@loop_invariant is_sorted(A,j,i);
+    {
+        if(A[j] < A[j-1])
+            swap(A,j,j-1);
+        else return;
+    }
+}
+// I find the proof of is_sorted(A,j,i) a bit iffy in the preservation step:
+//  a. assume is_sorted(A,j,i)
+//  b. A[j] > A[j-1] by conditional in line 142
+//  c. is_sorted(a,j-1,i) by math on a and b
+
+// Take a nonempty list and sort it in place from lo(inc) to hi(exc).
+void insertion_sort(int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A,lo,hi);
+{
+    for (int i = lo + 1; i < hi; i++)
+    //@loop_invariant lo < i && i <= hi;
+    //@loop_invariant is_sorted(A,lo,i);
+    {
+        if (A[i] < A[i-1]){
+            rearrange(A,lo,i + 1);
+        }
+    }
+}
+
+// The run time of this sort is O(n^2)
+// For every element of the array(n), the element and the one before it(if possible)
+// is checked. Each element can potentially carry out an operation for every element.
+
+
+int test(){
+    // rearrange
+    int n0 = 3;
+
+    int[] C = alloc_array(int,n0);
+    C[0] = 1; 
+    C[1] = 4; 
+    C[2] = 2;
+
+    rearrange(C,0,n0);
+    assert(is_sorted(C,0,n0));
+
+    // insertion_sort
+    int n = 4;
+    int[] A = alloc_array(int, n);
+    A[0] = 2;
+    A[1] = 4;
+    A[2] = 3;
+    A[3] = 5;
+    insertion_sort(A,0,n);
+
+    /* print_seg(A,0,n); */
+    assert(is_sorted(A,0,n));
+
+    return 0;
+}

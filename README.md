@@ -1,11 +1,12 @@
-# 🧠 Principles of Imperative Programming — CMU CS15122
-
-![build](https://img.shields.io/badge/build-passing-brightgreen)
+# Principles of Imperative Programming (CS15122 at CMU)
 ![proofs](https://img.shields.io/badge/proofs-verified-blue)
 ![language](https://img.shields.io/badge/language-C0%2FCC0-lightgrey)
 
-> **Learning the principles of imperative programming** 
 inspired by [CMU CS15122](https://www.cs.cmu.edu/~15122/) — a foundational computer science course at Carnegie Mellon University.
+This repository contains exercises, implementations, and proofs inspired by the CS15122.
+
+**Note:** This is a personal study repository.
+
 
 ---
 
@@ -26,6 +27,15 @@ This is not a fork or copy of course materials — implementations, reasoning st
 - **Core algorithms**: sorting algorithms, binary search, AVL trees, spanning trees and more.
 - **Verified properties**: loop invariants, sortedness proofs, and complexity bounds.
 - **Contract-driven development**: proving correctness *before* or *alongside* implementation.
+
+---
+
+
+## 🌟 Highlights
+
+Some of the challenging and rewarding exercises:
+- [Proof-driven Insertion Sort](./highlights/insertion_sort.c0) implemented and verified with full loop invariants and correctness proofs.
+
 
 ---
 

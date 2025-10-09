@@ -1,0 +1,61 @@
+//Insertion Sort ==========================================================
+
+// Performs insertion action from insertion_sort
+// from lo(inclusive) to i(exclusive) using A[i-1] as the inserted element
+void rearrange(int[] A, int lo, int i)
+//@requires 0 <= lo && lo <= i && i <= \length(A);
+//@requires is_sorted(A,lo,i-1);
+//@ensures is_sorted(A,lo,i);
+{
+    for(int j = i - 1; j > lo; j--)
+    //@loop_invariant lo <= j && j < i;
+    //@loop_invariant is_sorted(A,lo,j);
+    //@loop_invariant is_sorted(A,j,i);
+    {
+        if(A[j] < A[j-1])
+            swap(A,j,j-1);
+        else return;
+    }
+}
+
+// Take a nonempty list and sort it in place from lo(inclusive) to hi(exclusive).
+void insertion_sort(int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A,lo,hi);
+{
+    for (int i = lo + 1; i < hi; i++)
+    //@loop_invariant lo < i && i <= hi;
+    //@loop_invariant is_sorted(A,lo,i);
+    {
+        if (A[i] < A[i-1]){
+            rearrange(A,lo,i + 1);
+        }
+    }
+}
+
+int test(){
+    // rearrange
+    int n0 = 3;
+
+    int[] C = alloc_array(int,n0);
+    C[0] = 1; 
+    C[1] = 4; 
+    C[2] = 2;
+
+    rearrange(C,0,n0);
+    assert(is_sorted(C,0,n0));
+
+    // insertion_sort
+    int n = 4;
+    int[] A = alloc_array(int, n);
+    A[0] = 2;
+    A[1] = 4;
+    A[2] = 3;
+    A[3] = 5;
+    insertion_sort(A,0,n);
+
+    /* print_seg(A,0,n); */
+    assert(is_sorted(A,0,n));
+
+    return 0;
+}

@@ -1,0 +1,42 @@
+#use <util>
+
+// Search through a sorted list, A(n), for x using binary search
+int binsearch(int x, int[] A, int n)
+//@requires n == \length(A);
+//@requires is_sorted(A, 0, n);
+/*@ensures (\result == -1 && !is_in(x,A,0,n)) 
+  || ((0 <= \result && \result < n) && A[\result] == x); @*/
+{
+    int lo = 0;
+    int hi = n;
+
+    while (lo < hi)
+    //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
+    //@loop_invariant gt_seg(x,A,0,lo);
+    //@loop_invariant lt_seg(x,A,hi,n);
+    {
+        int mid = lo + (hi - lo) /2;
+        //@assert lo <= mid && mid < hi;
+        if (A[mid] == x) return mid;
+        if (A[mid] < x) {
+            lo = mid + 1;
+        } else { //@assert A[mid] > x;
+            hi = mid;
+        }
+    }
+    //@assert lo == hi;
+
+    return -1;
+}
+
+
+int test(){
+
+    int n = 4;
+    int[] A = alloc_array(int,n);
+    A[0] = 1; A[1] = 5; A[2] = 14; A[3] = 19;
+    int res = binsearch(14,A,n);
+    assert(res == 2);
+    
+    return 0;
+}

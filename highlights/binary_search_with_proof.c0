@@ -1,57 +1,5 @@
-//Lecture notes ==========================================================
-
-
 // search an s sorted array, A(n) for x
-int binsearch(int x, int[] A, int n)
-//@requires 0 <= n && n <= \length(A);
-//@requires is_sorted(A, 0, n);
-/*@ensures (-1 == \result && !is_in(x,A,0,n))
-        || ((0 <= \result && \result < n) && A[\result] == x);
-@*/
-{
-    int lo = 0;
-    int hi = n;
-    while (lo < hi)
-        //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
-        //@loop_invariant (lo == 0 || A[lo - 1] < x);
-        //@loop_invariant (hi == n || A[hi] > x);
-    {
-        int mid = lo + (hi - lo)/2;
-        //@assert lo <= mid && mid < hi;
-        
-        if (A[mid] == x) return mid;
-        if (A[mid] > x) {
-            hi = mid;
-        } else {
-            //@assert A[mid] < x;
-            lo = mid + 1;
-        }
-    }
-
-    //@assert lo == hi;
-    return -1;
-}
-
-int testbinsearch(){
-    int n = 3;
-    int[] A = alloc_array(int, n);
-    A[0] = 1; 
-    A[1] = 5;
-    A[2] = 8;
-
-    int res = binsearch(5,A,n);
-    assert(res == 1);
-
-    return 0;
-}
-
-
-//Exercise 1 ==========================================================
-
-// Refactor binsearch so that internally, it uses inclusive bound for both upper and lower bounds
-
-// search an s sorted array, A(n) for x
-int binsearchV2(int x, int[] A, int n)
+int binary_search(int x, int[] A, int n)
 //@requires n == \length(A);
 //@requires is_sorted(A, 0, n);
 /*@ensures (-1 == \result && !is_in(x,A,0,n))
@@ -161,16 +109,16 @@ int binsearchV2(int x, int[] A, int n)
 //      e. 0 <= \result && \result < n by d
 //      f. A[\result] == x by a 
 
-int testbinsearchV2(){
+int testbinary_search(){
     int n = 3;
     int[] A = alloc_array(int, n);
     A[0] = 1; 
     A[1] = 5;
     A[2] = 8;
 
-    int front = binsearchV2(1,A,n);
-    int middle = binsearchV2(5,A,n);
-    int end = binsearchV2(8,A,n);
+    int front = binary_search(1,A,n);
+    int middle = binary_search(5,A,n);
+    int end = binary_search(8,A,n);
     assert(front == 0);
     assert(middle == 1);
     assert(end == 2);

@@ -35,6 +35,7 @@ This is not a fork or copy of course materials — implementations, reasoning st
 
 Some of the challenging and rewarding exercises:
 - [Proof-driven Insertion Sort](./highlights/insertion_sort.c0) implemented and verified with full loop invariants and correctness proofs.
+- [Binary Search with Proof](./highlights/binary_search.c0) implemented and verified with full proof.
 
 
 ---

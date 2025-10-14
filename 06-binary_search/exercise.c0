@@ -13,10 +13,10 @@ int binsearch(int x, int[] A, int n)
     int hi = n;
     while (lo < hi)
         //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
-        //@loop_invariant (lo == 0 || A[lo -1] < x);
+        //@loop_invariant (lo == 0 || A[lo - 1] < x);
         //@loop_invariant (hi == n || A[hi] > x);
     {
-        int mid = lo + (hi - lo) /2;
+        int mid = lo + (hi - lo)/2;
         //@assert lo <= mid && mid < hi;
         
         if (A[mid] == x) return mid;
@@ -51,8 +51,8 @@ int testbinsearch(){
 // Refactor binsearch so that internally, it uses inclusive bound for both upper and lower bounds
 
 // search an s sorted array, A(n) for x
-int binsearch(int x, int[] A, int n)
-//@requires 0 < n && n <= \length(A);
+int binsearchV2(int x, int[] A, int n)
+//@requires n == \length(A);
 //@requires is_sorted(A, 0, n);
 /*@ensures (-1 == \result && !is_in(x,A,0,n))
         || ((0 <= \result && \result < n) && A[\result] == x);
@@ -60,57 +60,116 @@ int binsearch(int x, int[] A, int n)
 {
     int lo = 0;
     int hi = n - 1;
-    while (lo < hi)
-        //@loop_invariant 0 <= lo && lo <= hi && hi < n;
-        //@loop_invariant (lo == 0 || A[lo - 1] < x);
-        //@loop_invariant (hi == n - 1 || A[hi] > x);
+    while (lo <= hi)
+        //@loop_invariant 0 <= lo && lo <= hi + 1 && hi + 1 <= n;
+        //@loop_invariant gt_seg(x,A,0,lo);
+        //@loop_invariant lt_seg(x,A,hi+1,n);
     {
         int mid = lo + (hi - lo) /2;
-        //@assert lo <= mid && mid < hi;
+        //@assert lo <= mid && mid <= hi;
         
         if (A[mid] == x) return mid;
         if (A[mid] > x) {
-            hi = mid;
+            hi = mid - 1;
         } else {
             //@assert A[mid] < x;
             lo = mid + 1;
         }
     }
 
-    //@assert lo == hi;
+    //@assert lo == hi + 1;
     return -1;
 }
 
-// 1. Show loop invariants hold initially
-
-//  loop invariant 1:
+// INIT
+//  LI 1
 //   a. lo = 0 by line
-//   b. 0 <= n - 1 by math on precondition
-//   c. lo <= hi by math on a, b, and line where hi is defined
-//   d. n - 1 < n by math on line
-//   e. 0 <= lo && lo <= hi && hi < n initially
+//   b. 0 <= lo by math on a
+//   c. hi + 1 = (n - 1) + 1 by line and math
+//   d. hi = n by c
+//   e. 0 <= n by precondition (\length(A))
+//   f. lo <= n && n <= n by a, e, and math
+//   g. 0 <= lo && lo <= hi + 1 && hi + 1 <= n
 
-//  loop invariant 2:
-//   a. lo == 0;
+//  LI 2
+//   a. lo = 0 by line
+//   b. gt_seg(x,A,0,0) by math (x is greater than empty segment)
+//   c. gt_seg(x,A,0,lo) by b
 
-//  loop invariant 3:
-//   a. hi == n - 1;
+//  LI 3
+//   a. hi = n - 1 by line
+//   b. lt_seg(x,A,n,n) by math ( x is less than empty segment)
+//   c. lt_sef(x,A,hi+1,n) by b
 
-// 2. Show loop invariants are preserved:
+//  PRES
+//   A[mid] == x
+//    trivially case
+      
+//   A[mid] > x
+//    a. hi = mid - 1
+//     LI 1 
+//      a. hi + 1 = (mid - 1) + 1 by line (hi = mid - 1) 
+//      b. hi' = mid by a
+//      c. lo <= mid && mid <= hi by assertion
+//      d. 0 <= lo && lo <= hi' by assumption and b,c
+//      e. lo <= hi' + 1 by math on d
+//      f. hi' <= hi by assertion
+//      g. hi' + 1 <= hi + 1 by math on f
+//      h. hi' + 1 <= n by math on assumption
+//     LI 2
+//      i. gt_seg(x,A,0,lo) by assumption and lo doesn't change
+//     LI 3
+//      j. hi + 1 = mid by math on a
+//      k. x < A[mid] by line
+//      l. lt_seg(x,A,mid,n) by k, precondition(sorted), and j
+//      m. lt_seg(x,A,hi' + 1, n) by l
+      
+//   A[mid] < x
+//    a. lo' = mid + 1 by line
+//     LI 1 
+//      b. lo <= mid + 1 && mid + 1 <= hi + 1 by math on assertion
+//      c. 0 <= 'lo && 'lo <= hi + 1 && hi + 1 <= n by math on assumption and a,b
+//      d. 0 <= 'lo && 'lo <= 'hi + 1 && 'hi + 1 <= n by assumption (hi is preserved)
+//     LI 2
+//      e. x > A[mid] by assertion
+//      f. gt_seg(x,A,0,mid+1) by math on precondition(sorted) and e
+//      g. gt_seg(x,A,0,'lo) by a, e, and f
+//     LI 3
+//      h. hi is preserved, trivially true
+//  ASSERTION
+//   A1
+//    a. 0 <= (hi-lo)/2 by math on loop guard
+//    b. lo <= lo + (hi-lo)/2 by math on a
+//   A2
+//    a. I've done this proof before and I don't mind skipping it
+//   A3
+//    a. lo > hi by loop guard failing
+//    b. lo <= hi + 1 by loop invariant
+//    c. lo == hi + 1 by a and b
+//  TERM
+//      On an arbitrary iteration of the loop, hi - lo is strictly decreasing (hi is decreasing or lo is increasing), and cannot be less than -1. The guard is false when hi - lo is -1
+//  EXIT
+//     if \result is -1:
+//      a. lo == hi + 1 by assertion
+//      b. gt_seg(x,A,0,hi + 1) && lt_seg(x,A,hi+1,n) by loop invariants and a
+//      c. !is_in(x,A,0,n) by math on b
+//     else
+//      a. \result == mid && A[mid] == x by line
+//      b. lo <= mid && mid <= hi by assertion
+//      c. hi <= hi + 1 && hi < n by math on loop invariant
+//      d. 0 <= lo <= mid <= hi < n by math on loop invariant and b, c
+//      e. 0 <= \result && \result < n by d
+//      f. A[\result] == x by a 
 
-//  case 1 A[mid] == x:
-//   trivially correct
+int testbinsearchV2(){
+    int n = 3;
+    int[] A = alloc_array(int, n);
+    A[0] = 1; 
+    A[1] = 5;
+    A[2] = 8;
 
-//  case 2 A[mid] > x:
-//   a. hi' == mid && lo == 'lo by line
-//   loop invariant 1:
-//    b. lo <= mid by assertion
-//    c. 0 <= lo' && lo' <= mid && mid < n by math on b and assertions
-//    d. 0 <= lo' && lo' <= hi' && hi' < n by math on b and assertions.
-//   loop invariant 2:
-//    e. lo doesn't change so preserved
-//   loop invariant 3: 
-//    f. A[mid] > x by 
+    int res = binsearchV2(8,A,n);
+    assert(res == 2);
 
-//  case 3 A[mid] < x:
-//   e. 
+    return 0;
+}

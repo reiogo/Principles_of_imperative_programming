@@ -12,9 +12,9 @@ int binsearch(int x, int[] A, int n)
     int lo = 0;
     int hi = n;
     while (lo < hi)
-        //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
-        //@loop_invariant (lo == 0 || A[lo - 1] < x);
-        //@loop_invariant (hi == n || A[hi] > x);
+    //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
+    //@loop_invariant (lo == 0 || A[lo - 1] < x);
+    //@loop_invariant (hi == n || A[hi] > x);
     {
         int mid = lo + (hi - lo)/2;
         //@assert lo <= mid && mid < hi;
@@ -61,9 +61,9 @@ int binsearchV2(int x, int[] A, int n)
     int lo = 0;
     int hi = n - 1;
     while (lo <= hi)
-        //@loop_invariant 0 <= lo && lo <= hi + 1 && hi + 1 <= n;
-        //@loop_invariant gt_seg(x,A,0,lo);
-        //@loop_invariant lt_seg(x,A,hi+1,n);
+    //@loop_invariant 0 <= lo && lo <= hi + 1 && hi + 1 <= n;
+    //@loop_invariant gt_seg(x,A,0,lo);
+    //@loop_invariant lt_seg(x,A,hi+1,n);
     {
         int mid = lo + (hi - lo) /2;
         //@assert lo <= mid && mid <= hi;
@@ -140,8 +140,14 @@ int binsearchV2(int x, int[] A, int n)
 //   A1
 //    a. 0 <= (hi-lo)/2 by math on loop guard
 //    b. lo <= lo + (hi-lo)/2 by math on a
+//    c. (hi - lo)/2 <= (hi - lo) by math
+//    d. lo + (hi - lo)/2 <= hi by math on c
+//    e. 0 <= lo + (hi-lo)/2 <= hi
+//    f. 0 <= mid <= hi
 //   A2
-//    a. I've done this proof before and I don't mind skipping it
+//    a. A[mid] != x by line
+//    b. A[mid] <= x by line
+//    c. A[mid] < x by a and c
 //   A3
 //    a. lo > hi by loop guard failing
 //    b. lo <= hi + 1 by loop invariant
@@ -177,3 +183,299 @@ int testbinsearchV2(){
 
     return 0;
 }
+
+//Exercise 2 ==========================================================
+
+// Use different loop invariants 
+// search an s sorted array, A(n) for x
+int binsearchV3(int x, int[] A, int n)
+//@requires 0 <= n && n <= \length(A);
+//@requires is_sorted(A, 0, n);
+/*@ensures (-1 == \result && !is_in(x,A,0,n))
+        || ((0 <= \result && \result < n) && A[\result] == x);
+@*/
+{
+    int lo = 0;
+    int hi = n;
+    while (lo < hi)
+    //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
+    //@loop_invariant !is_in(x,A,0,lo);
+    //@loop_invariant !is_in(x,A,hi,n);
+    {
+        int mid = lo + (hi - lo)/2;
+        //@assert lo <= mid && mid < hi;
+        
+        if (A[mid] == x) return mid;
+        if (A[mid] > x) {
+            hi = mid;
+        } else {
+            //@assert A[mid] < x;
+            lo = mid + 1;
+        }
+    }
+
+    //@assert lo == hi;
+    return -1;
+}
+
+// INIT
+//  LI1
+//   a. lo == 0 by line
+//   b. 0 <= 0 by math
+//   c. 0 <= lo by math on a and b
+//   d. hi == n by line
+//   e. 0 <= n by precondition
+//   f. 0 <= lo <= hi by c, d, and e
+//   g. n <= n by math
+//   h. 0 <= lo <= hi <= n initially
+//  LI2
+//   a. lo == 0 by line
+//   b. !is_in(x,A,0,0) by math
+//   c. !is_in(x,A,0,lo) by math on a and b initially
+//  LI3
+//   a. hi == n by line
+//   b. !is_in(x,A,n,n) by math
+//   c. !is_in(x,A,n,hi) by math on a and b initially
+
+// PRES
+//  Case 1:
+//  trivially true
+//  Case 2:
+//   a. hi' == mid by line
+//    LI1
+//     b. lo <= mid < hi by assertion
+//     c. lo <= hi' < hi <= n by math on a, b, and assumption
+//     d. 0 <= lo <= hi' <= n
+//    LI2
+//     e. 'lo == lo by assumption
+//     f. !is_in(x,A,0,lo') by e
+//    LI3
+//     g. x < A[mid] by line
+//     h. x < A[mid..n] by g and precondition (sorted)
+//     i. !is_in(x,A,mid,n) by h
+//     j. !is_in(x,A,hi',n) by i
+//  Case 3:
+//   a. lo' == mid + 1 by line
+//    LI1
+//     b. lo <= mid by assertion
+//     c. lo <= mid + 1 by math on b
+//     d. 0 <= lo <= mid + 1 by assumption and math on c
+//     e. mid < hi by assertion
+//     f. mid + 1 <= hi by math on e
+//     g. 0 <= lo <= mid + 1 <= hi <= n by assumption and math on d,f
+//     h. 0 <= lo' <= hi' <= n by assumption and a and g
+//    LI2
+//     i. x > A[mid] by line
+//     j. x > A[0..mid] by math on precondition(sorted) and i
+//     k. !is_in(x,A,0,mid) by j
+//     l. !is_in(x,A,0,lo') by k
+//    LI3
+//     m. 'hi == hi by assumption
+//     n. !is_in(x,A,hi',n) by m
+//
+
+// ASSERT
+//  A1
+//   a. 0 <= (hi-lo)/2 by math on loop guard
+//   b. lo <= lo + (hi-lo)/2 by math on a
+//   c. (hi - lo)/2 < (hi - lo) by math
+//   d. lo + (hi - lo)/2 < hi by math on c
+//   e. lo <= lo + (hi - lo)/2 < hi by b and d
+//   f. lo <= mid < hi
+//  A2
+//   a. A[mid] != x by line
+//   b. A[mid] <= x by line
+//   c. A[mid] < x by a and c
+//  A3
+//   a. lo >= hi by loop guard failing
+//   b. lo <= hi by loop invariant
+//   c. lo == hi
+
+// TERM
+//  On an arbitrary iteration of the loop, hi - lo is strictly decreasing (lo is increasing or hi is decreasing)
+//  and cannot be less than 0. The loop breaks when hi - lo is zero.
+
+// EXIT
+//  if \result == -1
+//   a. lo == hi by assertion
+//   b. !is_in(x,A,0,lo) && !is_in(x,A,lo,n) by math on a
+//   c. !is_in(x,A,0,n) by math on b
+//  else
+//   a. \result == mid
+//   b. A[mid] == x by line
+//   c. A[\result] == x by a and b
+//   d. lo <= mid && mid < hi by assertion
+//   e. lo <= \result && \result < hi by a and d
+//   f. hi <= n by loop invariant
+//   g. mid < n by math on d and f
+//   h. 0 <= \result < n by math on loop invariant, e, and g
+
+//Exercise 3 ========================================================
+
+// An example of how the original binary search might not find the leftmost occurence
+// of x:
+//  [0,4,4,4] x = 4
+//  the left most is 1, but the answer will be 2
+// Tweak the binary search to find the left most occurence.
+
+// search an s sorted array, A(n) for x
+int binsearchV4(int x, int[] A, int n)
+//@requires 0 < n && n <= \length(A);
+//@requires is_sorted(A, 0, n);
+/*@ensures (-1 == \result && !is_in(x,A,0,n))
+        || ((0 <= \result && \result < n) && A[\result] == x && gt_seg(x,A,0,\result));
+@*/
+{
+    int lo = 0;
+    int hi = n;
+    while (lo < hi)
+    //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
+    //@loop_invariant gt_seg(x,A,0,lo);
+    //@loop_invariant le_seg(x,A,hi,n);
+    {
+        int mid = lo + (hi - lo)/2;
+        //@assert lo <= mid && mid < hi;
+        
+        if (A[mid] < x) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    //@assert lo == hi;
+    if (lo != n && A[lo] == x) return lo;
+    else return -1;
+}
+// INIT
+//  LI1 doesn't change
+//  LI2 
+//   a. gt_seg(x,A,0,0) by math
+//   b. lo == 0  by line
+//   c. gt_seg(x,A,0,lo) by a and b
+//  LI3
+//   a. le_seg(x,A,n,n) by math
+//   b. hi = n by line
+//   c. le_seg(x,A,hi,n) by a and b
+// PRES
+//  LI1 doesn't change
+//  LI2 
+//   lo only changes when A[mid]<x
+//    a. x > A[mid] by line
+//    b. gt_seg(x,A,0,mid+1) by math on a
+//    c. lo' = mid + 1
+//    d. gt_seg(x,A,0,lo') by math on b, and c
+//  LI3
+//   hi only changes when A[mid]>= x
+//    a. x <= A[mid] by line
+//    b. le_seg(x,A,mid,n) by math on a
+//    c. hi' == mid
+//    d. le_seg(x,A,hi',n) by math on b and c
+// TERM
+//  The same loop termination conditions
+// EXIT
+//  if A[lo] == x
+//   a. \result == lo
+//   b. A[\result] == x by line
+//   c. gt_seg(x,A,0,lo) by loop invariant
+//   d. gt_seg(x,A,0,\result) by c
+//   e. 0 <= lo <= n by assertion and precondition(sorted)
+//   f. lo != n by line
+//   g. 0 <= \result < n by e and f
+//  if \result == -1
+//   a. gt_seg(x,A,0,lo) && le_seg(x,A,lo,n) by loop invariants and assertion
+//   b. A[lo] != x by line 
+
+int testbinsearchV4(){
+    int n = 3;
+    int[] A = alloc_array(int, n);
+    A[0] = 1; 
+    A[1] = 5;
+    A[2] = 8;
+
+    int front = binsearchV4(1,A,n);
+    int middle = binsearchV4(5,A,n);
+    int end = binsearchV4(8,A,n);
+    assert(front == 0);
+    assert(middle == 1);
+    assert(end == 2);
+
+    return 0;
+}
+
+//Exercise 4 ========================================================
+
+// replacing the int mid = lo + (hi-lo)/2 with 
+// int mid = (lo+hi)/2
+// the assertion would fail
+// (lo+hi)/2 would be < 0 if it overflows. Then lo <= mid will fail
+
+
+//Exercise 5 ========================================================
+
+// show that lo/2 + hi/2 are not the same as (lo+hi)/2 in integer division
+// 3/2 + 4/2 = 1 + 2 = 3
+// (3 + 4)/2 = 7/2 = 3
+// 
+// 3/2 + 5/2 = 1 + 2 = 3
+// (3 + 5)/2 = 8/2 = 4
+// The integer division can cause a loss of data that can be equal to 1
+
+//Exercise 6 ========================================================
+
+// Below is my shitty attempt
+// show that lo+(hi-lo)/2 == (lo+hi)/2 without overflow and using integer division
+// 2lo + hi - lo == lo + hi
+// 2lo - lo == lo
+// lo == lo 
+
+// The attempt with the hint that I need to consider 4 cases
+// lo is odd and hi is even
+// lo is even and hi is even
+// lo is odd and hi is odd
+// lo is even and hi is odd
+
+// 1. odd even
+//  a. lo = 2m+1 and hi = 2n
+//  b. 2m+1+(2n - (2m+1))/2 == 2m+1+(2n-2m-1)/2
+//  c. (4m+2+2n-2m-1)/2 == (2m +2n +1)/2
+//  d. (lo + hi) /2
+// 2. even even
+//  a. lo = 2m and hi = 2n
+//  b. 2m + (2n - 2m)/2 == 2m + n - m
+//  c. m + n
+//  d. (2m + 2n)/2
+//  e. (lo + hi)/2
+// 3. odd odd
+//  a. lo = 2m+1 and hi=2n+1
+//  b. 2m+1 + (2n+1 - (2m+1))/2
+//  c. 2m+1 + (2n+1 -2m-1)/2
+//  d. 2m+1 + (2n-2m)/2
+//  e. 2m+1 +n -m 
+//  f. m+n+1
+//  g. (2m + 2n + 2)/2
+//  h. (2m+1+2n+1)/2
+//  i. (lo + hi)/2
+// 4. even odd
+//  a. lo = 2m and hi = 2n + 1
+//  b. 2m + ((2n+1)- 2m)/2 == 2m + (2n-2m+1)/2
+//  c. 4m/2 + (2n-2m+1)/2 == (4m-2m+2n+1)/2
+//  d. (2m+2n+1)/2 = (lo + hi)/2
+
+//Exercise 7 ==========================================================
+
+// INIT
+//  LI1 
+//   a. 0 <= 0 by math
+//   b. lo == 0 by line
+//   c. 0 <= lo by math on a and b
+//   d. 0 <= n by precondition
+//   e. hi == n by line
+//   f. lo <= hi by math on b, d,e
+//   g. 
+//  LI2 
+//  LI3 
+
+// PRES
+//  LI1 
+//  LI2 
+//  LI3 

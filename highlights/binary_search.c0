@@ -1,3 +1,6 @@
+// This was one of the first program proofs that actually made sense to me.
+// I actually understood what the contract was semantically indicating.
+
 // search an s sorted array, A(n) for x
 int binary_search(int x, int[] A, int n)
 //@requires n == \length(A);
@@ -88,8 +91,14 @@ int binary_search(int x, int[] A, int n)
 //   A1
 //    a. 0 <= (hi-lo)/2 by math on loop guard
 //    b. lo <= lo + (hi-lo)/2 by math on a
+//    c. (hi - lo)/2 <= (hi - lo) by math
+//    d. lo + (hi - lo)/2 <= hi by math on c
+//    e. 0 <= lo + (hi-lo)/2 <= hi
+//    f. 0 <= mid <= hi
 //   A2
-//    a. I've done this proof before and I don't mind skipping it
+//    a. A[mid] != x by line
+//    b. A[mid] <= x by line
+//    c. A[mid] < x by a and c
 //   A3
 //    a. lo > hi by loop guard failing
 //    b. lo <= hi + 1 by loop invariant

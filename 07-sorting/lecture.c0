@@ -1,0 +1,101 @@
+#use <util>
+
+// sort a given array from indices lo to hi
+// Using quicksort
+void sortV1 (int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A, lo, hi);
+{
+    if (hi - lo <= 1) return;
+    int pi = lo + (hi-lo)/2; // Should be random
+
+    int mid = parition(A,lo,pi,hi);
+    sort(A,lo,mid);
+    sort(A,mid+1,hi);
+    return;
+}
+
+int partition(int[] A, int lo, int pi, int hi)
+//@requires 0 <= lo && lo <= pi
+//@requires pi < hi && hi <= \length(A);
+//@ensures lo <= \result && \result < hi;
+//@ensures ge_seg(A[\result], A, lo, \result);
+//@ensures le_seg(A[\result], A, \result+1, hi);
+{
+    // Hold the pivot at lo
+    int pivot = A[pi];
+    swap(a,lo,pi);
+
+    // initialize left and right
+    int left = lo+1;
+    int right = hi;
+
+    while (left < right)
+    //@loop_invariant lo + 1 <= left && left <= right && right <= hi;
+    //@loop_invariant ge_seg(pivot,A,lo+1,left); // not including lo
+    //@loop_invariant le_seg(pivot,A,right,hi);
+    {
+        if (A[left] <= pivot) {
+            left++;
+        } else {
+            //@assert A[left] > pivot;
+            swap(A,left,right-1);
+            right--;
+        }
+    }
+
+    //@assert left == right;
+    swap(A,lo,left-1);
+    return left - 1;
+}
+
+// sort a given array from indices lo to hi
+// Using mergesort
+void sortV2 (int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A, lo, hi);
+{
+    if (hi-lo<=1) return;
+    int mid = lo+(hi-lo)/2;
+
+    sort(A,lo,mid); //@assert is_sorted(A,lo,mid);
+    sort(A,mid,hi); //@assert is_sorted(A,mid,hi);
+    merge(A,lo,mid,hi);
+    return;
+}
+
+void merge(int[] A, int lo, int mid, int hi)
+//@requires 0 <= lo && lo <= mid && mid <= hi && hi <= \length(A);
+//@requires is_sorted(A,lo,mid) && is_sorted(A,mid,hi);
+//@ensures is_sorted(A,lo,hi);
+{
+    int[] B = alloc_array(int,hi-lo);
+    int i = lo;
+    int j=mid;
+    int k = 0;
+
+    while(i <mid && j <hi)
+    //@loop_invariant lo <= i && i <= mid;
+    //@loop_invariant mid <= j && j <= hi;
+    //@loop_invariant k == (i - lo) + (j - mid);
+    {
+        if (A[i] <= A[j]){
+            B[k] = A[i];
+            i++;
+        } else { //@assert A[i] > A[j];
+            B[k] = A[j];
+            j++;
+        }
+        k++;
+    }
+
+    //@assert i == mid || j == hi;
+
+    // Fill in the rest
+    while (i < mid) {B[k] = A[i]; i++;k++;}
+    while (j < hi) {B[k] = A[j]; j++;k++}
+
+    for (k = 0; k <hi-lo; k++){
+        A[lo+k] = B[k];
+    }
+}

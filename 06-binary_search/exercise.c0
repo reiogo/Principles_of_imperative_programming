@@ -471,11 +471,13 @@ int testbinsearchV4(){
 //   d. 0 <= n by precondition
 //   e. hi == n by line
 //   f. lo <= hi by math on b, d,e
-//   g. 
+//   g. n <= n by math
+//   h. 0 <= lo <= hi <= n by c,f,g
 //  LI2 
+//   a. lo == 0
 //  LI3 
+//   a. hi == n
 
 // PRES
-//  LI1 
-//  LI2 
-//  LI3 
+//  trivially preserved
+// The termination fails which means the exit also fails

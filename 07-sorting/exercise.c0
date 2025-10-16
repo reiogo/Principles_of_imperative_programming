@@ -1,0 +1,325 @@
+#use <util>
+
+//Exercise 1 ============================================================
+
+//1.
+bool is_permutation (int[] A, int loA, int hiA, int[] B, int loB, int hiB)
+//@requires 0 <= loA && loA <= hiA && hiA <= \length(A);
+//@requires 0 <= loB && loB <= hiB && hiB <= \length(B);
+//@requires hiA-loA == hiB-loB;
+{
+    if (hiA-loA <= 0){
+        return true;
+    }
+
+    int Bpointer = loB;
+    while(A[loA] != B[Bpointer])
+    //@loop_invariant loB <= Bpointer && Bpointer <= hiB;
+    //@loop_invariant !is_in(A[loA],B,loB,Bpointer);
+    {
+        Bpointer++;
+        if (Bpointer >= hiB){
+            return false;
+        }
+    }
+    swap(B,loB,Bpointer);
+    //@assert loA+1 <= hiA && loB+1 <= hiB;
+    bool res = is_permutation(A,loA+1,hiA,B,loB+1,hiB);
+    swap(B,loB,Bpointer);
+    return res;
+}
+
+int tp(){
+    int n = 4;
+    int[] A = alloc_array(int, n);
+    int[] B = alloc_array(int, n);
+    A[0] = 1;
+    A[1] = 3;
+    A[2] = 5;
+    A[3] = 5;
+
+    B[0] = 3;
+    B[1] = 5;
+    B[2] = 1;
+    B[3] = 5;
+    assert(is_permutation(A,0,n,B,0,n));
+    print_seg(B,0,n);
+    
+    return 0;
+}
+
+bool array_equals(int[] A, int loA, int hiA, int[] B, int loB, int hiB)
+//@requires 0 <= loA && loA <= hiA && hiA <= \length(A);
+//@requires 0 <= loB && loB <= hiB && hiB <= \length(B);
+//@requires hiA - loA == hiB - loB;
+{
+    for (int i = 0; i < hiA-loA; i++)
+    //@loop_invariant 0 <= i && i <= hiA-loA;
+    {
+        if (A[i] != B[i]) return false;
+    }
+    return true;
+}
+
+int[] seg_copy (int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures array_equals(\result,0,hi-lo,A,lo,hi);
+{
+    int[] copy = alloc_array(int, hi-lo);
+    for(int i = 0; i < hi-lo; i++)
+    //@loop_invariant lo - lo <= i && i <= hi - lo;
+    //@loop_invariant array_equals(copy,0,i,A,lo,lo+i);
+    {
+        copy[i] = A[lo+i];
+    }
+    return copy;
+}
+
+int findmin(int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures lo <= \result && \result <= hi;
+//@ensures le_seg(A[\result],A,lo,hi);
+{
+    int minI = lo;
+    for (int i = lo + 1; i < hi; i++)
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant lo <= minI && minI < hi;
+    //@loop_invariant le_seg(A[minI],A,lo,i);
+    {
+        if (A[i] < A[minI]){
+            minI = i;
+        }
+    }
+    return minI;
+}
+
+void selsort(int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A,lo,hi);
+{
+    for (int i = lo; i < hi; i++)
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant is_sorted(A,lo,i);
+    //@loop_invariant le_segs(A,lo,i,A,i,hi);
+    {
+        int minindex = findmin(A,i,hi);
+        swap(A,i,minindex);
+    }
+}
+
+
+bool is_permutationV2 (int[] A, int loA, int hiA, int[] B, int loB, int hiB)
+//@requires 0 <= loA && loA <= hiA && hiA <= \length(A);
+//@requires 0 <= loB && loB <= hiB && hiB <= \length(B);
+//@requires hiA-loA == hiB-loB;
+{
+    int[] copyA = seg_copy(A,loA,hiA);
+    int[] copyB = seg_copy(B,loB,hiB);
+
+    selsort(copyA,loA,hiA);
+    selsort(copyB,loB,hiB);
+    int n = hiA-loA;
+
+    return array_equals(copyA,0,n,copyB,0,n);
+}
+
+int tpv2(){
+    int n = 4;
+    int[] A = alloc_array(int, n);
+    int[] B = alloc_array(int, n);
+    A[0] = 1;
+    A[1] = 3;
+    A[2] = 5;
+    A[3] = 5;
+
+    B[0] = 3;
+    B[1] = 5;
+    B[2] = 1;
+    B[3] = 5;
+    assert(is_permutationV2(A,0,n,B,0,n));
+    
+    return 0;
+}
+
+//2.
+
+// sort a given array from indices lo to hi
+// Using quicksort
+void sortV1 (int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A, lo, hi);
+{
+    int[] C = seg_copy(A,lo,hi);
+    if (hi - lo <= 1) return;
+    int pi = lo + (hi-lo)/2; // Should be random
+
+    int mid = parition(A,lo,pi,hi);
+    sort(A,lo,mid);
+    sort(A,mid+1,hi);
+    assert(is_permutationV2(A,lo,hi,C,0,hi-lo);
+
+    return;
+}
+
+int partition(int[] A, int lo, int pi, int hi)
+//@requires 0 <= lo && lo <= pi
+//@requires pi < hi && hi <= \length(A);
+//@ensures lo <= \result && \result < hi;
+//@ensures ge_seg(A[\result], A, lo, \result);
+//@ensures le_seg(A[\result], A, \result+1, hi);
+{
+    int[] C = seg_copy(A,lo,hi);
+    
+    // Hold the pivot at lo
+    int pivot = A[pi];
+    swap(a,lo,pi);
+
+    // initialize left and right
+    int left = lo+1;
+    int right = hi;
+
+    while (left < right)
+    //@loop_invariant lo + 1 <= left && left <= right && right <= hi;
+    //@loop_invariant ge_seg(pivot,A,lo+1,left); // not including lo
+    //@loop_invariant le_seg(pivot,A,right,hi);
+    {
+        if (A[left] <= pivot) {
+            left++;
+        } else {
+            //@assert A[left] > pivot;
+            swap(A,left,right-1);
+            right--;
+        }
+    }
+
+    //@assert left == right;
+    swap(A,lo,left-1);
+
+    assert(is_permutationV2(A,lo,hi,C,0,hi-lo);
+    return left - 1;
+}
+
+// sort a given array from indices lo to hi
+// Using mergesort
+void sortV2 (int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A, lo, hi);
+{
+    if (hi-lo<=1) return;
+    int mid = lo+(hi-lo)/2;
+
+    sort(A,lo,mid); //@assert is_sorted(A,lo,mid);
+    sort(A,mid,hi); //@assert is_sorted(A,mid,hi);
+    merge(A,lo,mid,hi);
+    return;
+}
+
+void merge(int[] A, int lo, int mid, int hi)
+//@requires 0 <= lo && lo <= mid && mid <= hi && hi <= \length(A);
+//@requires is_sorted(A,lo,mid) && is_sorted(A,mid,hi);
+//@ensures is_sorted(A,lo,hi);
+{
+    int[] B = alloc_array(int,hi-lo);
+    int i = lo;
+    int j=mid;
+    int k = 0;
+
+    while(i <mid && j <hi)
+    //@loop_invariant lo <= i && i <= mid;
+    //@loop_invariant mid <= j && j <= hi;
+    //@loop_invariant k == (i - lo) + (j - mid);
+    {
+        if (A[i] <= A[j]){
+            B[k] = A[i];
+            i++;
+        } else { //@assert A[i] > A[j];
+            B[k] = A[j];
+            j++;
+        }
+        k++;
+    }
+
+//3. To be honest I had no idea about how to get the asserts to work. How would you even know or investigate that?
+
+//Exercise 2 ============================================================
+
+// Use precondition of quicksort and contract for partition to imply the postcondition
+// a. 0 <= lo && lo <= hi && hi <= \length(A)
+// b. basically that lo and hi are within bounds for array access
+// c. 0 <= lo <= pi < hi < \length(A)
+// d. basically that the pivot point is valid
+// e. ensures that the result is within bounds
+// f. to the left and to the right of pivot are correct
+// That you can always partition and get the right pivots because your initially array
+// is safe for the parition function
+
+// prove the first return of sort
+//  a. 0 <= lo <= hi <= \length(A) by precondition
+//  b. hi - lo <= 1 by line
+//  c. is_sorted(A,lo,hi) by a and b since A[lo..hi] is 1 element
+// prove the second return of sort 
+//  a. A[lo ..p] <= A[p] by paritition call and contract
+//  b. A[p] <= A[p+1..hi] by partition call and contract
+//  c. is_sorted(A,lo,p) by line
+//  d. is_sorted(A,p+1,hi) by line
+//  e. is_sorted(A,lo,hi) by math on a,b,c,d
+
+//Exercise 3 ============================================================
+
+    // 6421357
+    // 1 642357
+    // 1 2 64357
+    // 1 2 3 6457
+    // 1 2 3 4 657
+    // 1 2 3 4 5 67
+    // 1 2 3 4 5 6 7
+
+//Exercise 4 ============================================================
+
+    void copy_from_to(int[] B, int loB, int hiB, int[]A, int loA, int hiA)
+    //@requires 0 <= loB && loB <= hiB && hiB <= \length(B);
+    //@requires 0 <= loA && loA <= hiA && hiA <= \length(A);
+    //@requires hiB-loB == hiA-loA;
+    //@ensures array_equals(B,loB,hiB,A,loA,hiA);
+    {
+        //...
+    }
+    int partitionV2(int[] A, int lo, int pi, int hi)
+    //@requires 0 <= lo && lo <= pi
+    //@requires pi < hi && hi <= \length(A);
+    //@ensures lo <= \result && \result < hi;
+    //@ensures ge_seg(A[\result], A, lo, \result);
+    //@ensures le_seg(A[\result], A, \result+1, hi);
+    {
+        int[] B = alloc_array(int, hi-lo);
+        int pivot = A[pi];
+        int left = 0;
+        int right = hi-lo;
+
+        for (int i = 0; i < hi-lo; i++)
+        //@loop_invariant 0 <= left && left <= right - 1  && right - 1 < hi-lo;
+        //@loop_invariant 0 <= i && i <= hi-lo;
+        //@loop_invariant gt_seg(pivot,B,0,left);
+        //@loop_invariant lt_sef(pivot,B,right,hi);
+        {
+            //@assert left < right - 1;
+            if (A[i] < pivot){
+                B[left] = A[i];
+                left++;
+            } else { //@assert A[i] >= pivot;
+                B[right] = A[i];
+                right--;
+            }
+        }
+        //@assert left == right - 1; 
+        B[left] = pivot;
+        copy_from_to(B,0,hi-lo,A,lo,hi);
+        return left;
+    }
+
+//Exercise 5 ============================================================
+
+
+//Exercise 6 ============================================================
+
+

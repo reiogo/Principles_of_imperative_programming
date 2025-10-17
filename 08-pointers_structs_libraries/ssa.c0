@@ -1,0 +1,105 @@
+#use <string>
+
+// Implementation-side type
+struct ssa_header{
+    string[] data;
+    int length;
+};
+typedef struct ssa_header ssa;
+
+bool ssa_sorted(string[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+{
+    for (int i = 0; i < hi - 1; i++)
+        //@loop_invariant lo <= i && i < hi;
+        if (string_compare(A[i],A[i+1]) >0) return false;
+    return true;
+}
+
+bool is_ssa(ssa* A)
+//@requires A->length == \length(A->data);
+{
+    if(A == NULL) return false;
+    //@assert A->length == \length(A->data);
+    return ssa_sorted(A->data, 0, A->length);
+}
+
+int ssa_len(ssa* A) // akin to \length(A)
+//@requires is_ssa(A);
+/*@ensures \result >= 0; @*/
+//@ensures \result == \length(A->data);
+{
+    return A->length;
+}
+
+string ssa_get(ssa* A, int i) // akin to A[i]
+//@requires is_ssa(A);
+/*@requires 0 <= i && i < ssa_len(A); @*/
+{
+    return A->data[i];
+}
+
+ssa* ssa_new(int size) // akin to alloc_array(string, size)
+/*@requires 0 <= size; @*/
+//@ensures is_ssa(\result);
+/*@ensures ssa_len(\result) == size; @*/
+{
+    ssa* tmp = alloc(ssa);
+    tmp->length = size;
+    tmp->data = alloc_array(string, size);
+
+    return tmp;
+}
+
+void ssa_set(ssa* A, int i, string x) // akin to A[i] = x
+//@requires is_ssa(A);
+/*@requires 0 <= i && i < ssa_len(A); @*/
+//@ensures is_ssa(A);
+{
+    A->data[i] = x;
+    // Move x up the array if needed
+    for (int j = i; j < A->length-1 &&
+            string_compare(A->data[j],A->data[j+1])>0; 
+            j++)
+    //@loop_invariant i <= j && j <= A->length -1;
+    {
+        swap(A->data, j, j+1);
+    }
+
+    // Move x down the array if needed
+    for (int j = i; j > 0 &&
+            string_compare(A->data[j],A->data[j-1]) < 0;
+            j--)
+    //loop_invariant 0 <= j && j <= i;
+    {
+        swap(A->data, j, j-1);
+    }
+
+}
+
+// Client type
+typedef ssa* ssa_t;
+
+// Interface ======================================================
+
+// typedef ______ * ssa_t;
+
+//Operations
+
+int ssa_len(ssa_t A) // akin to \length(A)
+    /*@requires A!= NULL; @*/
+    /*@ensures \result >= 0; @*/;
+
+ssa_t ssa_new(int size) // akin to alloc_array(string, size)
+    /*@ensures \result != NULL; @*/
+    /*@requires 0 <= size; @*/
+    /*@ensures ssa_len(\result) == size; @*/;
+
+string ssa_get(ssa_t A, int i) // akin to A[i]
+    /*@requires A!= NULL; @*/
+    /*@requires 0 <= i && i < ssa_len(A); @*/;
+
+void ssa_set(ssa_t A, int i, string x) // akin to A[i] = x
+    /*@requires A!= NULL; @*/
+    /*@requires 0 <= i && i < ssa_len(A); @*/;
+

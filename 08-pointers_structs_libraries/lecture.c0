@@ -1,0 +1,26 @@
+#use <util>
+#use <conio>
+
+struct image_header {
+    int width;
+    int height;
+    int[] data;
+};
+
+typedef struct image_header image;
+
+image* first_quadrant(image* img)
+//@requires img != NULL;
+//@ensures \result != NULL;
+{
+    image* out == alloc(image);
+    out->width = img->width/2;
+    out->height = img->height/2;
+    out->data = alloc_array(int, out->width * out->height);
+
+    for (int i = 0; i < out->width; i++)
+        for (int j = 0; j < out->height;j++)
+            out->data[i*out->width +j] = img->data[i*img->width+j];
+
+    return out;
+}

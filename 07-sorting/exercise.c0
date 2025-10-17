@@ -352,7 +352,18 @@ int testpv2(){
 
 //Exercise 5 ============================================================
 
+    // Give an example array that shows selection sort is not stable
+    // 2a 2b 1 3 where pivot is midpoint and equal elements are stored on the left
+    // 2b == 2a 
+    // 1 2b 2a 3
 
 //Exercise 6 ============================================================
-
-
+    
+// #1 is random, #2 is not
+// in the first round, they both grow almost linear in relation in input
+// which is close to nlogn
+//
+//in the second round #1 runs at nlogn but #1 runs at closer to n^2 time around 8 times more when the input is 4 times
+//so it probably runs on a sorted array
+//apparently it should be a growth of a factor of 16 (which is what I was thinking about too) but the discrepencies
+// might just come from the fact that it's big O

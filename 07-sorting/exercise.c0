@@ -142,27 +142,8 @@ int tpv2(){
 }
 
 //2.
-
-// sort a given array from indices lo to hi
-// Using quicksort
-void sortV1 (int[] A, int lo, int hi)
-//@requires 0 <= lo && lo <= hi && hi <= \length(A);
-//@ensures is_sorted(A, lo, hi);
-{
-    int[] C = seg_copy(A,lo,hi);
-    if (hi - lo <= 1) return;
-    int pi = lo + (hi-lo)/2; // Should be random
-
-    int mid = parition(A,lo,pi,hi);
-    sort(A,lo,mid);
-    sort(A,mid+1,hi);
-    assert(is_permutationV2(A,lo,hi,C,0,hi-lo);
-
-    return;
-}
-
 int partition(int[] A, int lo, int pi, int hi)
-//@requires 0 <= lo && lo <= pi
+//@requires 0 <= lo && lo <= pi;
 //@requires pi < hi && hi <= \length(A);
 //@ensures lo <= \result && \result < hi;
 //@ensures ge_seg(A[\result], A, lo, \result);
@@ -172,7 +153,7 @@ int partition(int[] A, int lo, int pi, int hi)
     
     // Hold the pivot at lo
     int pivot = A[pi];
-    swap(a,lo,pi);
+    swap(A,lo,pi);
 
     // initialize left and right
     int left = lo+1;
@@ -195,24 +176,28 @@ int partition(int[] A, int lo, int pi, int hi)
     //@assert left == right;
     swap(A,lo,left-1);
 
-    assert(is_permutationV2(A,lo,hi,C,0,hi-lo);
+    assert(is_permutationV2(A,lo,hi,C,0,hi-lo));
     return left - 1;
 }
 
 // sort a given array from indices lo to hi
-// Using mergesort
-void sortV2 (int[] A, int lo, int hi)
+// Using quicksort
+void sortV1 (int[] A, int lo, int hi)
 //@requires 0 <= lo && lo <= hi && hi <= \length(A);
 //@ensures is_sorted(A, lo, hi);
 {
-    if (hi-lo<=1) return;
-    int mid = lo+(hi-lo)/2;
+    int[] C = seg_copy(A,lo,hi);
+    if (hi - lo <= 1) return;
+    int pi = lo + (hi-lo)/2; // Should be random
 
-    sort(A,lo,mid); //@assert is_sorted(A,lo,mid);
-    sort(A,mid,hi); //@assert is_sorted(A,mid,hi);
-    merge(A,lo,mid,hi);
+    int mid = partition(A,lo,pi,hi);
+    sortV1(A,lo,mid);
+    sortV1(A,mid+1,hi);
+    assert(is_permutationV2(A,lo,hi,C,0,hi-lo));
+
     return;
 }
+
 
 void merge(int[] A, int lo, int mid, int hi)
 //@requires 0 <= lo && lo <= mid && mid <= hi && hi <= \length(A);
@@ -238,6 +223,23 @@ void merge(int[] A, int lo, int mid, int hi)
         }
         k++;
     }
+}
+
+// sort a given array from indices lo to hi
+// Using mergesort
+void sortV2 (int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A);
+//@ensures is_sorted(A, lo, hi);
+{
+    if (hi-lo<=1) return;
+    int mid = lo+(hi-lo)/2;
+
+    sortV2(A,lo,mid); //@assert is_sorted(A,lo,mid);
+    sortV2(A,mid,hi); //@assert is_sorted(A,mid,hi);
+    merge(A,lo,mid,hi);
+    return;
+}
+
 
 //3. To be honest I had no idea about how to get the asserts to work. How would you even know or investigate that?
 
@@ -276,46 +278,77 @@ void merge(int[] A, int lo, int mid, int hi)
 
 //Exercise 4 ============================================================
 
-    void copy_from_to(int[] B, int loB, int hiB, int[]A, int loA, int hiA)
-    //@requires 0 <= loB && loB <= hiB && hiB <= \length(B);
-    //@requires 0 <= loA && loA <= hiA && hiA <= \length(A);
-    //@requires hiB-loB == hiA-loA;
-    //@ensures array_equals(B,loB,hiB,A,loA,hiA);
-    {
-        //...
-    }
-    int partitionV2(int[] A, int lo, int pi, int hi)
-    //@requires 0 <= lo && lo <= pi
-    //@requires pi < hi && hi <= \length(A);
-    //@ensures lo <= \result && \result < hi;
-    //@ensures ge_seg(A[\result], A, lo, \result);
-    //@ensures le_seg(A[\result], A, \result+1, hi);
-    {
-        int[] B = alloc_array(int, hi-lo);
-        int pivot = A[pi];
-        int left = 0;
-        int right = hi-lo;
+void copy_from_to(int[] B, int loB, int hiB, int[]A, int loA, int hiA)
+//@requires 0 <= loB && loB <= hiB && hiB <= \length(B);
+//@requires 0 <= loA && loA <= hiA && hiA <= \length(A);
+//@requires hiB-loB == hiA-loA;
+//@ensures array_equals(B,loB,hiB,A,loA,hiA);
+{
+    int[] originalB = seg_copy(B,loB,hiB);
 
-        for (int i = 0; i < hi-lo; i++)
-        //@loop_invariant 0 <= left && left <= right - 1  && right - 1 < hi-lo;
-        //@loop_invariant 0 <= i && i <= hi-lo;
-        //@loop_invariant gt_seg(pivot,B,0,left);
-        //@loop_invariant lt_sef(pivot,B,right,hi);
-        {
-            //@assert left < right - 1;
+    for(int i = 0; i < hiB-loB; i++)
+    //@loop_invariant 0 <= i && i <= hiB-loB;
+    //@loop_invariant array_equals(B,loB,loB+i,A,loA,loA+i);
+    {
+        A[loA+i] = B[loB+i];
+    }
+
+    //@assert array_equals(originalB,0,hiB-loB,A,loA,hiA);
+}
+
+int partitionV2(int[] A, int lo, int pi, int hi)
+//@requires 0 <= lo && lo <= pi;
+//@requires pi < hi && hi <= \length(A);
+//@ensures lo <= \result && \result < hi;
+//@ensures ge_seg(A[\result], A, lo, \result);
+//@ensures le_seg(A[\result], A, \result+1, hi);
+{
+    int[] B = alloc_array(int, hi-lo);
+    int pivot = A[pi];
+    int left = 0;
+    int right = hi-lo;
+
+    for (int i = lo; i < hi; i++)
+    //@loop_invariant 0 <= left && left < right && right <= hi-lo;
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant gt_seg(pivot,B,0,left);
+    //@loop_invariant le_seg(pivot,B,right,hi);
+    {
+        if (i != pi) {
             if (A[i] < pivot){
                 B[left] = A[i];
                 left++;
             } else { //@assert A[i] >= pivot;
-                B[right] = A[i];
                 right--;
+                B[right] = A[i];
             }
         }
-        //@assert left == right - 1; 
-        B[left] = pivot;
-        copy_from_to(B,0,hi-lo,A,lo,hi);
-        return left;
     }
+    //@assert left == right - 1; 
+    B[left] = pivot;
+    copy_from_to(B,0,hi-lo,A,lo,hi);
+    return lo+left;
+}
+
+int testpv2(){
+    int n = 5;
+    int[] A = alloc_array(int, n);
+    int[] B = alloc_array(int, n);
+    A[0] = 5;
+    A[1] = 7;
+    A[2] = 2;
+    A[3] = 4;
+    A[4] = 1;
+
+    int res = partitionV2(A,0,2,n);
+
+    print_seg(A,0,n);
+
+    printf("\n%d res \n",res);
+    assert(res == 1);
+    
+    return 0;
+}
 
 //Exercise 5 ============================================================
 

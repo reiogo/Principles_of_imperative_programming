@@ -1,0 +1,19 @@
+void display_this_ssa(ssa_t A)
+//@requires A != NULL;
+{
+    printf("\n");
+    for (int j = 0; j < ssa_len(A); j++)
+    //@loop_invariant 0 <= j;
+    {
+        printf("%d => %s\n", j, ssa_get(A, j));
+    }
+        
+}
+
+int test(){
+    ssa_t A = ssa_new(2);
+    ssa_set(A,0,"b");
+    ssa_set(A,0,"a");
+    display_this_ssa(A);
+    return 0;
+}

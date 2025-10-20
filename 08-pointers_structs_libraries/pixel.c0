@@ -1,0 +1,184 @@
+#use <conio>
+struct pixel_as_struct{
+    int alpha;  // 0 <= alpha < 256 
+    int red;    // 0 <= red < 256 
+    int green;  // 0 <= green < 256 
+    int blue;   // 0 <= blue < 256 
+};
+typedef struct pixel_as_struct pixel;
+
+//Implementation ===========================================================
+
+bool is_pixel(pixel* p){
+    if (p == NULL) return false;
+
+    bool res =  (0 <= p->alpha && p->alpha < 256) 
+        && (0 <= p->red && p->red < 256) 
+        && (0 <= p->green && p->green < 256)
+        && (0 <= p->blue && p->blue < 256);
+
+    return res;
+}
+
+void print_unsafe_pixel(pixel* p){
+    printf("%d\n", p->alpha);
+    printf("%d\n", p->red);
+    printf("%d\n", p->green);
+    printf("%d\n", p->blue);
+}
+
+void print_pixel_internal(pixel* p)
+//@requires is_pixel(p);
+{
+    print_unsafe_pixel(p);
+}
+
+pixel* make_pixel(int alpha, int red, int green, int blue)
+//@requires 0 <= alpha && alpha < 256;
+//@requires 0 <= red && red < 256;
+//@requires 0 <= green && green < 256;
+//@requires 0 <= blue && blue < 256;
+//@ensures is_pixel(\result);
+{
+    pixel* p = alloc(pixel);
+    p->alpha = alpha;
+    p->red = red;
+    p->green = green;
+    p->blue = blue;
+
+    return p;
+}
+
+int get_alpha(pixel* p)
+//@requires is_pixel(p);
+//@ensures 0 <= \result && \result < 256;
+{
+    return p->alpha;
+}
+
+int get_red(pixel* p)
+//@requires is_pixel(p);
+//@ensures 0 <= \result && \result < 256;
+{
+    return p->red;
+}
+int get_green(pixel* p)
+//@requires is_pixel(p);
+//@ensures 0 <= \result && \result < 256;
+{
+    return p->green;
+}
+
+int get_blue(pixel* p)
+//@requires is_pixel(p);
+//@ensures 0 <= \result && \result < 256;
+{
+    return p->blue;
+}
+
+pixel* set_alpha(pixel* p, int value)
+//@requires is_pixel(p);
+//@requires 0 <= value && value < 256;
+//@ensures is_pixel(\result);
+//@ensures get_alpha(\result) == value;
+//@ensures get_red(\result) == get_red(p);
+//@ensures get_green(\result) == get_green(p);
+//@ensures get_blue(\result) == get_blue(p);
+{
+    return make_pixel(value, get_red(p), get_green(p), get_blue(p));
+}
+
+pixel* set_red(pixel* p, int value)
+//@requires is_pixel(p);
+//@requires 0 <= value && value < 256;
+//@ensures is_pixel(\result);
+//@ensures get_alpha(\result) == get_alpha(p);
+//@ensures get_red(\result) == value;
+//@ensures get_green(\result) == get_green(p);
+//@ensures get_blue(\result) == get_blue(p);
+{
+    return make_pixel(get_alpha(p), value, get_green(p), get_blue(p));
+}
+
+pixel* set_green(pixel* p, int value)
+//@requires is_pixel(p);
+//@requires 0 <= value && value < 256;
+//@ensures is_pixel(\result);
+//@ensures get_alpha(\result) == get_alpha(p);
+//@ensures get_red(\result) == get_red(p);
+//@ensures get_green(\result) == value;
+//@ensures get_blue(\result) == get_blue(p);
+{
+    return make_pixel(get_alpha(p), get_red(p), value, get_blue(p));
+}
+
+pixel* set_blue(pixel* p, int value)
+//@requires is_pixel(p);
+//@requires 0 <= value && value < 256;
+//@ensures is_pixel(\result);
+//@ensures get_alpha(\result) == get_alpha(p);
+//@ensures get_red(\result) == get_red(p);
+//@ensures get_green(\result) == get_green(p);
+//@ensures get_blue(\result) == value;
+{
+    return make_pixel(get_alpha(p), get_red(p), get_green(p), value);
+}
+
+//abstract client type
+typedef pixel* pixel_t;
+
+
+//Interface ===========================================================
+
+// typedef _______________ pixel_t; // abstract client type
+
+pixel_t make_pixel(int alpha, int red, int green, int blue)
+//@requires 0 <= alpha && alpha < 256;
+//@requires 0 <= red && red < 256;
+//@requires 0 <= green && green < 256;
+//@requires 0 <= blue && blue < 256;
+;
+
+int get_alpha(pixel_t p)
+//@ensures 0 <= \result && \result < 256;
+;
+
+int get_red(pixel_t p)
+//@ensures 0 <= \result && \result < 256;
+;
+int get_green(pixel_t p)
+//@ensures 0 <= \result && \result < 256;
+;
+int get_blue(pixel_t p)
+//@ensures 0 <= \result && \result < 256;
+;
+
+pixel_t set_alpha(pixel_t p, int value)
+//@requires 0 <= value && value < 256;
+//@ensures get_alpha(\result) == value;
+//@ensures get_red(\result) == get_red(p);
+//@ensures get_green(\result) == get_green(p);
+//@ensures get_blue(\result) == get_blue(p);
+;
+pixel_t set_red(pixel_t p, int value)
+//@requires 0 <= value && value < 256;
+//@ensures get_alpha(\result) == get_alpha(p);
+//@ensures get_red(\result) == value;
+//@ensures get_green(\result) == get_green(p);
+//@ensures get_blue(\result) == get_blue(p);
+;
+pixel_t set_green(pixel_t p, int value)
+//@requires 0 <= value && value < 256;
+//@ensures get_alpha(\result) == get_alpha(p);
+//@ensures get_red(\result) == get_red(p);
+//@ensures get_green(\result) == value;
+//@ensures get_blue(\result) == get_blue(p);
+;
+
+pixel_t set_blue(pixel_t p, int value)
+//@requires 0 <= value && value < 256;
+//@ensures get_alpha(\result) == get_alpha(p);
+//@ensures get_red(\result) == get_red(p);
+//@ensures get_green(\result) == get_green(p);
+//@ensures get_blue(\result) == value;
+;

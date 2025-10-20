@@ -1,0 +1,71 @@
+// Lecture provided interface for stack and queue
+// typedef ______* stack_t;
+
+bool stack_empty(stack_t S) /* O(1), check if stack empty */
+/*@requires S != NULL; @*/;
+
+stack_t stack_new() /* O(1), create new empty stack */
+/*@ensures \result != NULL; @*/
+/*@ensures stack_empty(\result); @*/;
+
+void push(stack_t S, string x) /* O(1), add item on top of stack */
+/*@requires S != NULL; @*/
+/*@ensures !stack_empty(S); @*/;
+
+string pop(stack_t S) /* O(1), remove item from top */
+/*@requires S != NULL; @*/
+/*@requires !stack_empty(S); @*/;
+
+
+int stack_size(stack_t S)
+//@requires S!=NULL;
+//@requires \result >= 0;
+{
+    int count = 0;
+    stack_t copy = alloc(stack_t);
+
+    while (!stack_empty(S)){
+        count++;
+        push(copy, pop(S));
+    }
+    while (!stack_empty(copy)){
+        push(S,pop(copy));
+    }
+    
+    return count;
+}
+
+// typedef ______* queue_t;
+bool queue_empty(queue_t Q) /* O(1) */
+/*@requires Q != NULL; @*/;
+
+queue_t queue_new() /* O(1) */
+/*@ensures \result != NULL; @*/
+/*@ensures queue_empty(\result); @*/;
+
+void enq(queue_t Q, string e) /* O(1) */
+/*@requires Q != NULL; @*/;
+
+string deq(queue_t Q) /* O(1) */
+/*@requires Q != NULL; @*/
+/*@requires !queue_empty(Q); @*/ ;
+
+queue_t queue_copy(queue_t Q) 
+//@requires Q != NULL;
+//ensures \result != NULL;
+{
+    queue_t copy = alloc(queue_t);
+    queue_t tmpq = alloc(queue_t);
+
+    while(!queue_empty(Q)){
+        string tmp = deq(Q);
+        enq(copy, tmp);
+        enq(tmpq, tmp);
+    }
+
+    while(!queue_empty(tmpq)){
+        enq(Q,deq(tmpq));
+    }
+    return copy;
+
+}

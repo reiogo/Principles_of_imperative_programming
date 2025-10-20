@@ -1,0 +1,120 @@
+#use <conio>
+#use <util>
+#use <string>
+
+//Exercise 1
+
+struct address_info {
+    string street;
+    int zipcode;
+    string city;
+    string state;
+};
+
+typedef struct address_info addr;
+
+struct contact_info {
+    string name;
+    string phone_number;
+    string email;
+    addr* address;
+
+};
+typedef struct contact_info contact;
+
+void print_contact(contact* A){
+    printf("%s\n",A->name);
+    printf("%s\n",A->phone_number);
+    printf("%s\n",A->email);
+    printf("%s\n",A->address->street);
+    printf("%d\n",A->address->zipcode);
+    printf("%s\n",A->address->city);
+    printf("%s\n",A->address->state);
+}
+
+int main(){
+    contact* bud = alloc(contact);
+    bud->name = "bud";
+    bud->phone_number = "010-000-000";
+    bud->email = "bud@hield.com";
+    
+    addr* ba = alloc(addr);
+    ba->street = "Walmsley";
+    ba->zipcode = 8998;
+    ba->city = "New bud";
+    ba->state = "Budstate";
+    
+    bud->address = ba;
+
+    print_contact(bud);
+    return 0;
+}
+
+//Exercise 2 draw the state of memory in the given program
+// I actually got confused about pointers and memory addresses in this exercise despite being under
+// the impression that I was right. Good to know.
+
+//Exercise 3 Use point to reason to justify the safety of each line
+
+/* 1 int main() { */
+/* 2 int* p = alloc(int); */
+/* 3 *p = 7; */
+/* 4 int*[] A = alloc_array(int*, 2); */
+/* 5 A[0] = p; */
+/* 6 A[1] = alloc(int); */
+/* 7 *A[1] = 5; */
+/* 8 int*[]* B = alloc(int*[]); */
+/* 9 *B = alloc_array(int*, 2); */
+/* 10 (*B)[0] = A[1]; */
+/* 11 (*B)[1] = p; */
+/* 12 */
+/* 13 return 0; */
+/* 14 } */
+
+//1 N/A
+//2 N/A
+//3 line 2, postcondition of alloc(int);
+//4 N/A
+//5 line 4, 0 <= index < 2
+//6 line 4, 0 <= index < 2
+//7 line 6, postcondition of alloc(int) AND 4
+//8 N/A
+//9 line 8 by postcondition of alloc(int*[]);
+//10 line 9, 6 index and type BY 8,9,4
+//11 line 9,2 index and type BY 8,9
+//12 N/A
+//13 N/A
+//14 N/A
+ 
+
+//Exercise 4
+//implement a pixel type
+//in pixel.c0
+
+//Exercise 5
+//in pixel.c0
+
+//Exercise 6
+//Wrong implementation
+void complement_pixel(pixel* p)
+//@requires p != NULL;
+//@requires is_pixel(p);
+{
+    p->red = 255 - p->red;
+    p->green = 255 - p->green;
+    p->blue = 255 - p->blue;
+}
+
+// the code in general is based off of implementation logic
+// the return is reflective of pointer usage, the type in the params are not
+// the client side type. Setters aren't used. Data structure invariant shouldn't be used here.
+
+pixel_t complement_pixel_fixed(pixel_t p)
+{
+    pixel_t res = make_pixel(
+            get_alpha(p),
+            255- get_red(p),
+            255-get_green(p),
+            255-get_blue(p));
+    return  res;
+}

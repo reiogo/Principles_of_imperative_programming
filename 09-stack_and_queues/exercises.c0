@@ -1,0 +1,56 @@
+//Exercise 1
+//whats wrong with the following code
+
+stack_t stack_copy(stack_t S)
+    //@requires S != NULL;
+{
+    stack_t tmp = stack_new(); // temporary stack
+    stack_t copy = stack_new(); // stack to be returned
+                                // move all elements of S into tmp
+    while (!stack_empty(S)) {
+        string x = pop(S);
+        push(copy, x);
+        push(tmp, x);
+    }
+    while (!stack_empty(tmp))
+        push(S, pop(tmp));
+    return copy;
+}
+
+stack_t stack_copy_fixed(stack_t S)
+//@requires S != NULL;
+{
+    stack_t tmp = stack_new(); // temporary stack
+    stack_t copy = stack_new(); // stack to be returned
+                                // move all elements of S into tmp
+    while (!stack_empty(S)) {
+        push(tmp, pop(s));
+    }
+    while (!stack_empty(tmp)){
+        string popped = pop(tmp);
+        push(S, popped);
+        push(copy, popped);
+    }
+    return copy;
+}
+
+//Exercise 2
+
+
+
+//Exercise 3
+
+
+
+//Exercise 4
+
+
+
+//Exercise 5
+
+
+
+//Exercise 6
+
+
+

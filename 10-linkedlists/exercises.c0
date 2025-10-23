@@ -1,0 +1,295 @@
+typedef struct list_node list;
+
+typedef int elem;
+struct list_node {
+    int data;
+    list* next;
+};
+
+bool is_segment(list* start, list* end) {
+  if (start == NULL) return false;
+  if (start == end) return true;
+  return is_segment(start->next, end);
+}
+
+// Exercise 1
+
+// define is_sum, which checks that the sum of all in from start to end is equal to sum
+// if empty then segment is equal to zero
+bool is_sum(list* start, list* end, int sum)
+//@requires is_segment(start, end);
+{
+    int check = 0;
+    list* tmp = start;
+    while (tmp != end)
+    {
+        check+=tmp->data;
+        tmp = tmp->next;
+    }
+    return check == sum;
+}
+
+bool is_sumV2(list* start, list* end, int sum)
+//@requires is_segment(start, end);
+{
+    if (start == end) return sum == 0;
+    else {
+        return is_sumV2(start->next, end, sum - start->data);
+    }
+}
+
+// Exercise 2
+
+// gets the list segment length
+int lseg_len(list* start, list* end)
+//@requires is_segment(start,end);
+{
+    int count = 0;
+    list* t = start;
+    while (t!=end)
+    {
+        t = t->next;
+        count++;
+    }
+    return count;
+}
+
+int lseg_lenV2(list* start, list* end)
+//@requires is_segment(start,end);
+{
+    if (start == end) return 0;
+    else return 1 + lseg_len(start->next, end);
+}
+
+// The lecture note's solution
+int lseg_lenV3(list* start, list* end)
+//@requires is_segment(start,end);
+{
+    int n = 0;
+    for (list* p = start; p != end; p = p->next)
+    //@loop_invariant p != NULL;
+    {
+        n++;
+    }
+    return n;
+}
+    
+
+// Exercise 3
+
+// return ith(0-indexing) element of l
+// assertion fails if fewer than i elements
+elem ith_solution(list* l, int i)
+//@requires i >= 0;
+{
+    list* res = l;
+    for (res = l; i != 0; i--)
+    {
+        assert(res->next != NULL);
+        res = res->next;
+    }
+    return res->data;
+}
+
+// the lecture's solution
+
+elem ith(list* l, int i)
+//@requires i >= 0;
+{
+    list* p = l;
+    for (p = l; p != NULL; p = p->next){
+        if (i == 0) return p->data;
+        i--;
+    }
+    assert(false);
+    return p->data;
+}
+
+// what is the asymptotic complexity of calling ith(l,i) where l has n elements
+// O(n);
+
+// Exercise 4
+
+//is x in [start,end)?
+bool is_in_lseg(int x, list* start, list* end)
+//@requires is_segment(start,end);
+{
+    for (list* t = start; t != end; t->next)
+    //@loop_invariant t != NULL;
+    {
+        if (x == t->data) return true;
+    }
+    
+    return false;
+}
+
+// is [start,end) sorted?
+bool is_sorted_lseg(list* start, list* end)
+//@requires is_segment(start,end);
+{
+    list* l = start;
+    list* r = start->next;
+    while( r != end){
+        if (l->data > r->data) return false;
+        l = l->next;
+        r = r->next;
+    }
+    return true;
+}
+
+// solution, mine is forgetting that an empty list is start == end so start->next would crash
+ 
+bool is_sorted_lseg_solution(list* start, list* end)
+//@requires is_segment(start,end);
+{
+    if (start == end)
+        return true;
+
+    int x = start->data;
+    for (list* p = start->next; p != end; p = p->next)
+    //@loop_invariant p!= NULL;
+    {
+        if (x > p->data) return false;
+        x = p->data;
+    }
+    return true;
+}
+
+
+// Exercise 5
+
+// define binary search algorithm for list segment
+int lseg_binsearchV1(int x, list* start, list* end)
+//@requires is_segment(start, end);
+//@requires is_sorted_lseg(start,end);
+/*@ensures (\result == -1 && !is_in_lseg(x,start,end)) 
+   || (0 <= \result && \result < lseg_len(start, end) 
+   && ith(start, \result) == x);
+@*/
+{
+    list* lo = start;
+    list* hi = end;
+
+    while (lo != hi)
+    //@loop_invariant 0 <= lseg_len(lo, hi) && lseg_len(lo,hi)<= lseg_len(start,end);
+    //@loop_invariant !is_in_lseg(x, start, lo);
+    //@loop_invariant !is_in_lseg(x, hi, end);
+    {
+        int mid = lseg_len(lo,hi)/2;
+        //@assert 0 <= mid && mid < lseg_len(lo,hi);
+        int mid_data = ith(lo, mid);
+
+        list* mid_pointer = lo;
+        for (int i = 0; i < mid; i++){
+            mid_pointer = mid_pointer->next;
+        }
+
+        if (mid_data == x) {
+            return mid;
+        } else if (mid_data < x) {
+            lo = mid_pointer->next;
+        } else {
+            //@assert mid_data > x;
+            hi = mid_pointer;
+        }
+
+    }
+    //@assert lo == hi;
+    return -1;
+}
+
+int lseg_binsearch(int x, list* start, list* end)
+//@requires is_segment(start, end);
+//@requires is_sorted_lseg(start,end);
+/*@ensures (\result == -1 && !is_in_lseg(x,start,end)) 
+   || (0 <= \result && \result < lseg_len(start, end) 
+   && ith(start, \result) == x);
+@*/
+{
+    int lo = 0;
+    int hi = lseg_len(start,end);
+
+    while (lo != hi)
+    //@loop_invariant 0 <= lo && lo <= hi;
+    //@loop_invariant lo = 0 || ith(start, lo - 1) < x;
+    //@loop_invariant hi = lseg_len(start,end) || ith(start, hi) > x;
+    {
+        int mid = lo + (hi-lo)/2;
+        //@assert lo <= mid && mid < hi;
+        int mid_data = ith(start, mid);
+
+        if (mid_data == x) {
+            return mid;
+        } else if (mid_data < x) {
+            lo = mid + 1;
+        } else {
+            //@assert mid_data > x;
+            hi = mid;
+        }
+
+    }
+    //@assert lo == hi;
+    return -1;
+}
+
+// Exercise 6
+
+// Take the given tortoise and the hare implementation
+// 1. Why can't we prove assert t!= NULL without a loop invariant
+//  A. because there is no point to reference that says (start, h] is a valid segment
+// 2. What loop invariant would work?
+//  A. a loop invariant that t is a valid segment
+// 3. Is it possible to write an invariant that proves a cycle is found on exit?
+//  A. h == t means the pointers in the linkedlist are not unique. Considering
+//  the definition of a cycle to be a linked list without termination,
+//  maybe a loop invariant like, t->next != NULL? which is basically the solution's answer 
+
+bool is_acyclic(list* start) {
+    if (start == NULL) return true;
+    list* h = start->next;
+    list* t = start;
+    while(h != t)
+    //@loop_invariant is_segment(t, h);
+    //@loop_invariant is_segment(t->next,h);
+    {
+        if (h == NULL || h->next == NULL) return true;
+        h = h->next->next;
+        //@assert t!=NULL;
+        t = t->next;
+    }
+    //@assert h == t;
+    return false;
+}
+
+// Exercise 7
+
+
+
+// Exercise 8
+
+
+
+// Exercise 9
+
+
+
+// Exercise 10
+
+
+
+// Exercise 11
+
+
+
+// Exercise 12
+
+
+
+// Exercise 13
+
+
+
+// Exercise 14
+
+
+

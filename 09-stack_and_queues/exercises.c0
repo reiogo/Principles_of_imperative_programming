@@ -24,7 +24,7 @@ stack_t stack_copy_fixed(stack_t S)
     stack_t copy = stack_new(); // stack to be returned
                                 // move all elements of S into tmp
     while (!stack_empty(S)) {
-        push(tmp, pop(s));
+        push(tmp, pop(S));
     }
     while (!stack_empty(tmp)){
         string popped = pop(tmp);
@@ -35,22 +35,229 @@ stack_t stack_copy_fixed(stack_t S)
 }
 
 //Exercise 2
-
-
+// empty the original stack and return a reversed stack
+stack_t stack_reverse(stack_t S)
+//@ensures S!=NULL;
+//@ensures stack_empty(S);
+//@ensures !stack_empty(\result);
+{
+    stack_t reversed = stack_new();
+    while (!stack_empty(S))
+    {
+        push(reversed, pop(S));
+    }
+    //@assert stack_empty(S);
+    return reversed;
+}
 
 //Exercise 3
 
+bool is_sorted_asc(int[] A, int n)
+//@requires \length(A) == n;
+{
+    for (int i = 0; i < n - 1; i++)
+    //@loop_invariant 0 <= i && i <= n - 1;
+    //@loop_invariant ge_seg(A[i],A,0,i);
+    {
+        if (A[i+1] < A[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool is_sorted_desc(int[] A, int n)
+//@requires \length(A) == n;
+{
+    for (int i = 0; i < n - 1; i++)
+    //@loop_invariant 0 <= i && i <= n - 1;
+    //@loop_invariant ge_seg(A[i],A,0,i);
+    {
+        if (A[i+1] > A[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+// return true if items in stack S are sorted in ascending order
+// largest at top, smallest at bottom
+bool stack_sorted_ascending(stack_t S){
+
+    stack_t copy = stack_new();
+
+    int count = 0;
+    while(!stack_empty(S)){
+        push(copy,pop(S));
+        count++;
+    }
+
+    int[] checker = alloc_array(int,count);
+
+    int i = 0;
+    while(!stack_empty(copy))
+    //@loop_invariant 0 <= i && i <= count;
+    {
+        int x = pop(copy);
+        push(S, x);
+        checker[i] = x;
+        i++;
+    }
+    return is_sorted_asc(checker, count);
+}
+
+// return true if sorted descending
+bool stack_sorted_descending(stack_t S){
+    stack_t copy = stack_new();
+    int count = 0;
+    while(!stack_empty(S)){
+        push(copy,pop(S));
+        count++;
+    }
+
+    int[] checker = alloc_array(int,count);
+
+    int i = 0;
+    while(!stack_empty(copy))
+    //@loop_invariant 0 <= i && i <= count;
+    {
+        int x = pop(copy);
+        push(S, x);
+        checker[i] = x;
+        i++;
+    }
+    return is_sorted_desc(checker,count);
+}
+
+// solutions from lecture pdf
+bool solution(stack_t S)
+//@requires S != NULL;
+{
+    if (stack_empty(S))
+        return true;
+
+    //@assert !stack_empty(S);
+    stack_t tmp = stack_copy(S);
+    //@assert !stack_empty(tmp);
+    
+    int n = pop(tmp);
+    while (!stack_empty(tmp)){
+        int m = pop(tmp);
+        if (!(n>m)) return false;
+        n = m;
+    }
+    //@assert stack_empty(tmp);
+    return true;
+}
 
 
 //Exercise 4
 
+//implement the function
 
+//sort the given stack so that the largest value is at the top
+void stack_sort(stack_t S)
+//@requires S != NULL;
+{
+    if (stack_size(S) <= 1) return;
+    //@assert stack_size(S) > 1;
+    
+    int pivot = pop(S);
+    stack_t left = stack_new();
+    stack_t right = stack_new();
+
+    while (!empty_stack(S))
+    {
+        int current = pop(S);
+        if ( current >= pivot){
+            push(right, current);
+        } else {
+            //@assert current < pivot;
+            push(left, current);
+        }
+    }
+
+    while(!empty_stack(right)) push(S,pop(right));
+    stack_sort(S);
+
+    stack_t tmp = stack_new();
+    push(tmp,pop(S));
+
+    while(!empty_stack(left)) push(S,pop(left));
+    stack_sort(S);
+
+    push(S,pivot);
+    while(!empty_stack(tmp)) push(S,pop(tmp));
+}
+
+// With hints from the solution
+// This version won't really work, since the check are impure
+void stack_sort(stack_t S)
+//@requires S != NULL;
+{
+    stack_t tmp = stack_new();
+
+    while (!stack_empty(S))
+    //@loop_invariant stack_sorted_ascending(tmp);
+    {
+        int pivot = pop(S);
+
+        while(!stack_empty(tmp) && peek(tmp) < pivot)
+        {
+            push(S, pop(tmp));
+        }
+        push(tmp, pivot);
+    }
+    //@assert stack_empty(S);
+    while (!stack_empty(tmp))
+    //@loop_invariant stack_sorted_ascending(tmp);
+    //@loop_invariant stack_sorted_descending(tmp);
+    {
+        push(S, pop(tmp));
+    }
+}
 
 //Exercise 5
+// implement the client-side function:
+int queue_sum(queue_t Q)
+//@requires Q != NULL;
+{
 
+    queue_t tmp = queue_new();
+    int sum = 0;
+
+    while (!queue_empty(Q))
+    {
+        int deqqed = deq(Q);
+        sum += deqqed;
+        enq(tmp, deqqed);
+    }
+    while (!queue_empty(tmp)){
+        enq(Q, deq(tmp));
+    }
+    return sum;
+}
 
 
 //Exercise 6
+// implement a recursive version of the client side function:
+int stack_sizeV2(stack_t S){
+    if(stack_empty(S)){
+        return 0;
+    } else {
+        int tmp = pop(S);
+        int count = 1 + stack_sizeV2(S);
+        push(S,tmp);
+        return count;
+    }
+}
+
+// the 4 questions of generative recursion: 
+//  trivial case: the stack is empty
+//  return 0
+//  smaller problems: the stack with the first element popped is one less
+//  count them up, and return the stack as it was.
+
 
 
 

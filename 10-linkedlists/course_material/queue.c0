@@ -39,7 +39,9 @@ bool is_segment(list* start, list* end) {
 // Iterative version using a while loop
 bool is_segmentB(list* start, list* end) {
   list* l = start;
-  while (l != NULL) {
+  while (l != NULL) 
+  // loop_invariant 
+  {
     if (l == end) return true;
     l = l->next;
   }

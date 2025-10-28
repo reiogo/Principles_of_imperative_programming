@@ -6,7 +6,23 @@ struct list_node {
     list* next;
 };
 
-bool is_segment(list* start, list* end) {
+bool is_reachable_in(list* start, list* end, int numsteps);
+
+bool is_segmentB(list* start, list* end) {
+  list* l = start;
+  int count = 0;
+  while (l != NULL) 
+  //@loop_invariant is_reachable_in(start,l,count);
+  {
+    if (l == end) return true;
+    l = l->next;
+    count++;
+  }
+  return false;
+}
+
+bool is_segment(list* start, list* end) 
+{
   if (start == NULL) return false;
   if (start == end) return true;
   return is_segment(start->next, end);
@@ -211,8 +227,8 @@ int lseg_binsearch(int x, list* start, list* end)
 
     while (lo != hi)
     //@loop_invariant 0 <= lo && lo <= hi;
-    //@loop_invariant lo = 0 || ith(start, lo - 1) < x;
-    //@loop_invariant hi = lseg_len(start,end) || ith(start, hi) > x;
+    //@loop_invariant lo == 0 || ith(start, lo - 1) < x;
+    //@loop_invariant hi == lseg_len(start,end) || ith(start, hi) > x;
     {
         int mid = lo + (hi-lo)/2;
         //@assert lo <= mid && mid < hi;
@@ -236,14 +252,6 @@ int lseg_binsearch(int x, list* start, list* end)
 
 // Take the given tortoise and the hare implementation
 // 1. Why can't we prove assert t!= NULL without a loop invariant
-//  A. because there is no point to reference that says (start, h] is a valid segment
-// 2. What loop invariant would work?
-//  A. a loop invariant that t is a valid segment
-// 3. Is it possible to write an invariant that proves a cycle is found on exit?
-//  A. h == t means the pointers in the linkedlist are not unique. Considering
-//  the definition of a cycle to be a linked list without termination,
-//  maybe a loop invariant like, t->next != NULL? which is basically the solution's answer 
-
 bool is_acyclic(list* start) {
     if (start == NULL) return true;
     list* h = start->next;
@@ -263,33 +271,181 @@ bool is_acyclic(list* start) {
 
 // Exercise 7
 
-
+// find the issues with this code:
+// I asked for ai to nudge me in the right direction: originally i thought 
+// that it was that the conditional q==p->next couldn't prove the postcondition.
+// But i guess i'm being nudged in the direction that p->next isn't proven to be safe.
+// The solution was that it can't handle self loops lol, not even close.
+bool bad_is_acyclic(list* start) {
+    for (list* p = start; p != NULL; p = p->next)
+    //@loop_invariant is_segment(start, p);
+    {
+        if (p == NULL) return true;
+        for (list* q = start; q != p; q=q->next)
+        //@loop_invariant is_segment(start,q);
+        //@loop_invariant is_segment(q,p);
+        {
+            if (q == p->next) return false;
+        }
+    }
+    return true;
+}
 
 // Exercise 8
-
-
+ 
+// Q. is_acyclic is called on start and is_segment is called on start to
+// end to see validate a segment of nodes. When does this fail? write a
+// specification function.
+// A. It fails when a cycle happens after end. this is a valid segment
+bool is_definite_segment(list* start, list* end)
+//@requires is_segment(start,end);
+{
+  if (start == end) return true;
+  list* h = start->next;         // hare
+  list* t = start;               // tortoise
+  while (h != t) {
+    if (h == end || h->next == end) return true;
+    h = h->next->next;
+    //@assert t != end; // hare is faster and hits NULL quicker
+    t = t->next;
+  }
+  //@assert h == t;
+  return false;
+}
 
 // Exercise 9
-
+// what happens if an element is popped from an empty stack when contracts 
+// are not checked. When does an error rise?
+// the value is a default value 0, and it raises an error when 
+// the next line tries to access the pointer to the next list_node
+// which might be NULL where the program will crash, or its node not in the
+// stack proper. With contracts enabled apparently is_empty in is_stack 
+// will raise an error? oh the ensures contract 
 
 
 // Exercise 10
 
+// Implement stack without the floor pointer as defined in section 6
+typedef struct stack_header stack;
+struct stack_header{
+    list* top;
+};
 
+bool is_stack(stack* S){
+    return S != NULL && is_acyclic(S->top);
+}
+
+bool stack_empty(stack* S)
+//@requires is_stack(S);
+{
+    return S->top == NULL;
+}
+
+stack* stack_new()
+//@ensures is_stack(\result);
+//@ensures stack_empty(\result);
+{
+    stack* new = alloc(stack);
+    new->top = NULL;
+    return new;
+}
+
+int pop(stack* S)
+//@requires is_stack(S);
+//@requires !stack_empty(S);
+//@ensures is_stack(S);
+{
+    int res = S->top->data;
+    S->top = S->top->next;
+    return res;
+}
+
+void push(stack* S, int x)
+//@requires is_stack(S);
+//@ensures is_stack(S);
+//@ensures !stack_empty(S);
+{
+    list* new = alloc(list);
+    new->data = x;
+    new->next = S->top;
+    S->top = new;
+    return;
+}
 
 // Exercise 11
 
+// consider how sharing can break a queue
+// start with a valid queue and write enq and deq operations(that returns a new header everytime)
+// that will break the representation invariant of a queue
+//  Q != NULL, is_acyclic, is_segment
+//queue* Q = queue_new();
+//queue* Q1 = enq(Q,2);
+//queue* Q2 = enq(Q1,4);
 
+// queue* Q3 = deq(Q2);
+// queue* Q4 = enq(Q3,Q1->front);
+
+// Glanced at the solution, and I don't see any cycles, so I'm guessing this isn't what they were going for.
+
+//queue* Q = queue_new();
+//queue* Q1 = enq(Q,2);
+//queue* Q2 = enq(Q1,4);
+//queue* Q3 = enq(Q2,5);
+//queue* Q4 = enq(Q2,7);
+//queue* Q5 = enq(Q1,9);
+//The enq at the earlier point is breaking the logic of the FIFO
+
+// The solution:
+//queue* Q = queue_new();
+//queue* Q1 = enq(Q,2);
+//queue* Q2 = enq(Q1,4);
+//queue* Q3 = enq(Q1,7);
 
 // Exercise 12
+// implement a spec function for is_seg
+bool is_reachable_in(list* start, list* end, int numsteps)
+//@requires numsteps >= 0;
+{
+    if (start == NULL || end == NULL) return false;
 
+    list* tmp = start;
+    int decrement = numsteps;
+    while(decrement != 0 && tmp != NULL)
+    //@loop_invariant numsteps - decrement == lseg_len(start,tmp);
+    {
+        tmp = tmp->next;
+        decrement--;
+    }
+    //@assert numsteps - decrement == 0;
+
+    if (tmp == end) return true;
+    else return false;
+}
 
 
 // Exercise 13
 
-
+// what happens when the order of the last two lines of enq is swapped.
+void enq(queue* Q, string s)
+//@requires is_queue(Q);
+//@ensures is_queue(Q) && !queue_empty(Q);
+{
+    list * l = alloc(list);
+    Q->back->data = s;
+    Q->back->next = l;
+    Q->back = l;
+}
+// if 
+// Q->back = l;
+// Q->back->next = l;
+// Q->back is set to the new dummy node
+// we lose access to the new data (without entire traversal) and
+// Q->back->next sets the end to itself
 
 // Exercise 14
+
+// write an interface and implementation of a double ended-queue
+// in double_ended_q.c0
 
 
 

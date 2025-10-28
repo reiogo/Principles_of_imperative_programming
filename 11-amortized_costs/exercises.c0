@@ -1,0 +1,111 @@
+// Exercise 1
+// Q. Why is size equal to 0 if limit is 1 and size*2 otherwise?
+//   A. size *2 when size is 0 would be zero. limit should be greater
+//     than size at initialization so its set to 1 instead.
+// Q. if allocating an array of n elements cost n tokens then what's the 
+//      worst case cost of uba_add. How many tokens need to be budgeted?
+//   A. The worst case cost of uba_add would be O(n) considering that in
+//   the worst case an array of n elements need to be allocated.
+//   need to budget 7 tokens.
+// Solution: 3n+1 tokens which is O(n)
+
+uba* uba_new(int size)
+//@requires 0 <= size;
+//@ensures is_uba(\result);
+//@ensures uba_len(\result) == size;
+{
+    uba* A = alloc(uba);
+    int limit = size == 0? 1 : size*2;
+    A->data = alloc_array(string, limit);
+    A->size = size;
+    A->limit = limit;
+
+    return A;
+}
+
+// Exercise 2
+
+// Q. What would happen if the array size increase was 75% instead of 100%. 
+//   What about 300%? How many tokens would it cost?
+//  A. In the case of 75%: Every time the array was at it's limit it would grow 
+//  by 75%. Ummm the token cost candidate would be 4? still would be 1+n array writes,
+//  if the array allocation costs tokens then it would be worst case 7/4n+(n+1) tokens
+// Solution: we would need to pay 10/3 tokens for each uba_add operation. 
+//  Basically, assume, the array contains k elements on the last resize.
+//  Now the array has k + 3k/4 = 7k/4 length. after 3k/4 more writes, 
+//  we will write 7k/4 elements into the new array. so we need at least
+//  7k/4 divided by 3k/4 tokens per add call. which is 7/3 tokens.
+//  each element needs to be written in to begin with so also needs one token.
+//  That gives 10/3 tokens
+// A. my attempt at 300% after seeing the solution for 75%:
+//  assume k elements on the last resize. 
+//  then the new array has a length of k+3k = 4k.
+//  after 3k writes, a new array is needed, and must copy
+//  4k elements so each add call needs 4k/3k tokens
+//  which is 4/3 tokens
+//  plus one for just writing in the element anyways gives us 7/3 tokens
+//
+
+// Exercise 3
+
+// Q. In the previous exercise we see that resizing with larger factors cost fewer tokens than resizing with
+// smaller factors. Despite this what might be the benefit of using a smaller factor?
+//  A. It's more memory efficient but still amortized. At larger lengths, there are more and more redundant
+//  memory allocations.
+
+// Exercise 4
+
+// A coffee machine is enough to serve 50 people a day
+// each costumer drinks one coffee per day
+// a coffee machine costs 100 dollars
+// one coffee costs 2 dollars
+// A. The minimum cost for each coffee should be 6.09 dollars
+//  rounded up it would be 7 dollars to get 45 dollars profit after 50 people
+//  Is there a better strategy? I don't know. I don't think so?
+//
+// Solution: My answer was completely wrong.
+//  The solution is that you assume that you have n machines
+//   1. say you have 50n customers, then the next 50 need to take on 
+//    the cost of the party and the next machine
+//   2. That means each person's cost is ((100n+100)+100)/50 = 2n+4 dollars per coffee.
+//   3. The better strategy is to have less parties to have a better amortized cost
+//      For example, throw a party every time you double the number of machines.
+//      if you have n machines and 50n customers, you have (100n+100n+100n)/50n dollars per coffee
+//      that's just 6 dollars.
+//
+
+// Exercise 5
+
+// Q. The data structure invariant for shrinking the array. Minimum tokens? Amortized cost?
+//  A. The original data structure invariant:
+//      every element in the 2nd half of the array has a token and the corresponding element in the 
+//      first half of the array has a token
+//      The uba_rem needs one token to change the size parameter.
+//
+//      Every element in the first half of the array that doesn't have a corresponding element in the
+//      second half has two tokens.
+//
+//      You need n/2 tokens for an array of n to write to a smaller array.
+//      assume you have a full array with n elements 
+//      There are n/2 calls to rba_rem before a reallocation to a smaller array:
+//      each rba_rem call must have at least ((n/2+1)/(n/2)) + 1 tokens 
+//      That's 2+(2/n) tokens, maybe it's better to think of that as 3 tokens?
+//
+//      The amortized cost is 3 tokens per uba_rem
+//
+//      if we don't consider the cost of the allocation, then the math is more clean
+//      and it is two tokens per uba_rem with one token for every element in the first 
+//      half that doesn't have a corresponding element in the second half.
+//
+//  Solution:
+//      Actually it should reallocate when it's a quarter full or else a new add after 
+//      reallocation would cause an immediate reallocation.
+//
+//
+//
+
+// Exercise 6
+
+// The moment you'd realize is when trying to show that an increase of the array
+// size right after a shrinking wouldn't give you any tokens to increase.
+

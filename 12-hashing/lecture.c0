@@ -1,0 +1,44 @@
+// Exercise 1
+
+// What happens if you implement a separate chaining hash dictionary where the buckets
+// are made of array, sorted list, queue, stack, or another hashtable.
+
+// An array: The dictionary would only be able to handle a predefined type of entry/value
+//  The look up in the array would still be O(m) where m is the size of the array
+//  There would be limit to the size unless you used an unbounded array.
+//  benefits: There aren't any since the index isn't known before hand
+// Sorted list: Could binary search on the entry/value which would give O(log n) search
+//  time. The disadvantage would be the added complexity of keeping everything sorted.
+//  The solution meant sorted linked lists, in which case O(m).
+// Queue: enq could be constant time, but deq is more complicated. You would need to
+//  take every element out of the key and think about putting everything back O(m) for 
+//  the length of the array.
+// Stack: push is constant, but pop is the same problem as queue.
+// Hashtable: the set up is overly complicated but does give good operations.
+// if the hashtable is good then constant insert and find. The disadvantage, is
+// that you have to obviously set up the hashtable in the original hashtable.
+
+// Exercise 2
+
+// Use the birthday paradox to explain why collisions occur so often even though it feels like
+// the set up ensures very few collisions.
+//
+// The birthday paradox is that it only takes 23 people to get a 50% chance that two people will share birthdays
+//
+// 79/676 which is greater than 10 percent. But as in the birthday problem there are 79*78/2 pairs to consider
+// which is 3081 pairs. The likelihood of collisions comes from 3081 pairs not having collisions in presumably a
+// hashtable of length ~ 100
+
+// Exercise 3
+
+// given a separate chaining hash dictionary of size 10, with keys of type int
+//  1. given hash(x) = 2x+1 and a sequence 8,122,127,42,13,15
+//      it gives 17,245,255,85,27,31 after being processed by the hash function
+//      it gives 7,5,5,5,7,1
+//      3 non-nulls
+//      longest chain is 3, 122,127,42 are in it
+//  2. give a hash function that would give index 9 the sequence: 16,37,56,17,36
+//      foreach(n) in sequence hash(n) = x where x mod 10 = 9
+//      9,19,29,39...
+//      n/2+1
+

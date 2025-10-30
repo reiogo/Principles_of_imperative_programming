@@ -1,0 +1,348 @@
+// Exercise 1
+
+//implement a client interface
+struct student_record {
+    int id;
+    char[] grade;
+    bool auditing;
+    string note;
+};
+
+struct rand{
+    int seed;
+};
+
+rand_t init_rand(int seed){
+    rand_t gen = alloc(struct rand);
+    gen->seed = seed;
+    return gen;
+}
+
+int rand(rand_t gen) {
+    gen->seed = gen->seed * 1664525 + 1012904223;
+    return gen->seed;
+}
+
+typedef student_record* entry;
+
+typedef int key;
+
+key entry_key(entry x)
+//@requires x != NULL
+{
+    x->id;
+}
+
+
+int key_hash(key k)
+{
+    return rand(init_rand(k));
+}
+
+bool key_equiv(key a, key b)
+{
+    return a == b;
+}
+
+// Exercise 2
+
+// implement new functions
+
+int hdict_size(hdict_t D)
+//@requires D != NULL;
+//@ensures \result >= 0;
+;
+
+entry[] hdict_tabulate(hdict_t D)
+//@requires D != NULL;
+//@ensures \length(\result) == hdict_size(D);
+;
+
+int hdict_size(hdict* D)
+//@requires is_dict(D);
+//@ensures \result >= 0;
+{
+    return D->size;
+}
+
+entry[] hdict_tabulate(hdict_t D)
+//@requires is_dict(D);
+//@ensures \length(\result) == hdict_size(D);
+{
+    entry[] res = alloc(entry, D->size);
+    int counter = 0;
+    for (int i = 0; i < D->capacity; i++)
+    //@loop_invariant 0 <= i && i <= D->capacity;
+    {
+        for (chain* p = D->table[i]; p!=NULL; p = p->next)
+        //@loop_invariant 0 <= counter && counter <= D->size;
+        {
+            res[counter] = p->data;
+            counter++;
+        }
+    }
+    return res;
+}
+
+// Exercise 3
+// Change the library interface
+hdict_t hdict_new(int capacity, int maxload)
+//@requires capacity > 0 && maxload > 0;
+//@ensures \result != NULL;
+;
+// Change to the type definition
+typedef struct hdict_header hdict;
+struct hdict_header{
+    int size;
+    chain*[] table;
+    int capacity;
+    int maxload;
+};
+
+void hdict_insert(hdict* H, entry x)
+//@requires is_hdict(H);
+//@requires x != NULL;
+//@ensures is_hdict(H);
+//@ensures x == hdict_lookup(H,entry_key(x));
+{
+    /* int load_factor = 0.8; */
+    /* if (H->size / H->capacity > load_factor){ */
+    // avoid the above integer division shenanigans 
+    if (H->size >= H->capacity * H->maxload){
+        resize(H, 2*H->capacity);
+    }
+    key k = entry_key(x);
+    int i = index_of_key(H,k);
+    for(chain* p = H->table[i]; p != NULL; p = p->next){
+        //@assert p->data != NULL;
+        if (key_equiv(entry_key(p->data),k)){
+            p->data = x;
+            return;
+        }
+    }
+    // prepend new entry
+    chain* p = alloc(chain);
+    p->data = x;
+    p->next = H->table[i];
+    H->table[i] = p;
+    (H->size)++;
+}
+
+void resize(hdict*H, int new_capacity);
+
+void hdict_insert(hdict* H, entry x);
+
+// Extend the hash table to dynamically resizes itself when the load factor exceeds a given threshold.
+void resize(hdict* H, int new_capacity)
+//@requires is_dict(H);
+//@ensures is_dict(H);
+{
+    int old_capacity = H->capacity;
+
+    chain*[] old_table = H->table;
+
+    H->capacity = new_capacity;
+    H->table = alloc(chain*, H->capacity);
+    H->size = 0;
+  
+    for (int i = 0; i < old_capacity; i++)
+    //@loop_invariant 0 <= i && i <= old_capacity;
+    {
+        for (chain* p = old_table[i]; p!=NULL; p=p->next)
+        {
+            hdict_insert(H,p->data); 
+        }
+    }
+
+}
+
+// Exercise 4
+
+// rewrite
+int key_hash_rewrite(key k, int m)
+//@requires m > 0;
+//@ensures 0 <= \result && \result < m;
+{
+    return key_hash(k) % m;
+}
+
+int index_of_key(hdict* H, key k)
+//@requires is_hdict(H);
+//@ensures 0 <= \result && \result < H->capacity;
+{
+    return abs(key_hash(k, H->capacity));
+}   
+
+// Exercise 5
+
+// write a new function, delete the entry of a given key
+
+void hdict_remove(hdict_t H, key k)
+//@requires H != NULL;
+//@ensures hdict_lookup(H, k) == NULL;
+;
+
+void hdict_remove(hdict* H, key k)
+//@requires is_hdict(H);
+{
+    if (H->size < H->capacity*H->minimum_load) {
+        //@assert minimum_load < 0.5;
+        resize(H, H->capacity/2+1);
+    }
+
+    int i = index_of_key(H, k);
+
+    if (H->table[i] == NULL) return;
+    //@assert H->table[i] != NULL;
+    if (key_equiv(entry_key(H->table[i]->data),k)) {
+        H->table[i] = H->table[i]->next;
+        return;
+    }
+
+    chain* p_old = H->table[i];
+    for (chain* p = H->table[i]->next; p != NULL; p = p->next) 
+    //loop invariant is that the list did not contain 
+    //a matching key up to current p
+    {
+        if (key_equiv(entry_key(p->data), k)){
+            //remove p
+            p_old->next = p->next;
+            (H->size)--;
+            return;
+        } 
+        p_old = p_old->next;
+    }
+
+}
+
+//solution from the lecture:
+
+void hdict_delete(hdict* H, key k) 
+//@requires is_hdict(H);
+//@ensures hdict_lookup(H,k) == NULL;
+//@ensures is_hdict(H);
+{
+    int i = index_of_key(H,k);
+    chain* prev = NULL;
+    bool done = false;
+    for (chain* p = H->table[i]; p != NULL && !done; p = p->next){
+        if (key_equiv(k,entry_key(p->data))){
+            if(prev == NULL)
+                H->table[i] = p->next;
+            else{
+                prev->next = p->next;
+                (H->size)--;
+                done = true;
+            }
+        }
+        prev = p;
+    }
+
+    if (H->size <= (H->capacity * H->maxload) /4)
+        hdict_resize(H, H->capacity/2 > 0? H->capacity/2:1);
+}
+
+// Exercise 6
+
+// non-embedding key
+// Client interface
+// typedef _______ key; // by client
+// typedef _______* value; // by client
+bool key_equiv(key x, key y);
+int key_hash(key x);
+
+// Library interface
+// typedef _______* hdict_t;
+
+hdict_t hdict_new(int capacity)
+//@requires capacity > 0;
+//@ensures \result != NULL;
+;
+
+value hdict_lookup(hdict_t H, key k)
+//@requies H != NULL;
+;
+
+void hdict_insert(hdict_t H, key k, value v)
+//@requires H!=NULL;
+//@requires v != NULL;
+//@ensures hdict_lookup(H,k) == v;
+;
+
+// Library implementation
+
+// library-side implementation
+typedef struct chain_node chain;
+
+struct chain_node{
+    key key;
+    value value; // !=NULL
+    chain* next;
+};
+
+typedef struct hdict_header hdict;
+struct hdict_header {
+    int size; // 0<=size
+    int capacity; // 0 < capacity
+    chain*[] table; // \length(table) == capacity
+};
+
+bool is_hdict(hdict* H) {
+    return H != NULL
+        && 0 <= H->size
+        && 0 < H->capacity
+        && is_array_expected_length(H->table, H->capacity);
+        //&& there are no NULL values
+        //&& each value satisfies its own representation invariants
+        //&& there aren't values with equal keys
+        //&& the number of values matches the size
+        //&& every value in H->table[i] hashes to i
+        //&& ...
+}
+hdict* hdict_new(int capacity)
+//@requires capacity > 0;
+//@ensures is_hdict(\result);
+{
+    hdict* H = alloc(hdict);
+    H->size = 0;
+    H->capacity = capacity;
+    H->table = alloc_array(chain*, capacity);
+    return H;
+}
+
+value hdict_lookup(hdict* H, key k)
+//@requires is_hdict(H);
+{
+    int i = index_of_key(H,k);  
+    for (chain* p = H->table[i]; p != NULL; p = p->next){
+        if (key_equiv(p->key, k))
+            return p->value;
+    }
+    return NULL;
+}
+
+void hdict_insert(hdict* H, key k, value v)
+//@requires is_hdict(H);
+//@requires v != NULL;
+//@ensures is_hdict(H);
+//@ensures hdict_lookup(H,k) == v;
+{
+    int i = index_of_key(H,k);
+    for (chain* p = H->table[i]; p != NULL; p=p->next){
+        if (key_equiv(p->key, k)){
+            p->value = v;
+            return;
+        }
+    }
+    chain* p = alloc(chain);
+    p->key = k;
+    p->value = v;
+    p->next = H->table[i];
+    H->table[i] = p;
+    (H->size)++;
+}
+
+// Exercise 7
+
+
+

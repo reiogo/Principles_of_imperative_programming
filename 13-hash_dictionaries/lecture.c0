@@ -1,0 +1,102 @@
+// Fixed size hashtable
+
+// library-side implementation
+typedef struct chain_node chain;
+
+struct chain_node{
+    entry data; // != NULL
+    chain* next;
+};
+
+typedef struct hdict_header hdict;
+struct hdict_header {
+    int size; // 0<=size
+    int capacity; // 0 < capacity
+    chain*[] table; // \length(table) == capacity
+};
+
+bool is_hdict(hdict* H) {
+    return H != NULL
+        && 0 <= H->size
+        && 0 < H->capacity
+        && is_array_expected_length(H->table, H->capacity);
+        //&& there are no NULL entries
+        //&& each entry satisfies its own representation invariants
+        //&& there aren't entries with equal keys
+        //&& the number of entries matches the size
+        //&& every entry in H->table[i] hashes to i
+        //&& ...
+}
+
+int index_of_key(hdict* H, key k)
+//@requires is_hdict(H);
+//@ensures 0 <= \result && \result < H->capacity;
+{
+    return abs(key_hash(k)%H->capacity);
+}   
+
+hdict* hdict_new(int capacity)
+//@requires capacity > 0;
+//@ensures is_hdict(\result);
+{
+    hdict* H = alloc(hdict);
+    H->size = 0;
+    H->capacity = capacity;
+    H->table = alloc_array(chain*, capacity);
+    return H;
+}
+
+entry hdict_lookup(hdict* H, key k)
+//@requires is_hdict(H);
+//@ensures \result == NULL || key_equiv(entry_key(\result), k);
+{
+    int i = index_of_key(H, k);
+    for (chain* p = H->table[i]; p != NULL; p = p->next) {
+        if (key_equiv(entry_key(p->data), k))
+            return p->data;
+    }
+    return NULL;
+}
+
+void hdict_insert(hdict* H, entry x)
+//@requires is_hdict(H);
+//@requires x != NULL;
+//@ensures is_hdict(H);
+//@ensures x == hdict_lookup(H,entry_key(x));
+{
+    key k = entry_key(x);
+    int i = index_of_key(H,k);
+    for(chain* p = H->table[i]; p != NULL; p = p->next){
+        //@assert p->data != NULL;
+        if (key_equiv(entry_key(p->data),k)){
+            p->data = x;
+            return;
+        }
+    }
+    // prepend new entry
+    chain* p = alloc(chain);
+    p->data = x;
+    p->next = H->table[i];
+    H->table[i] = p;
+    (H->size)++;
+}
+
+// Hash set
+
+// Client interface
+
+// typedef ______* hset_t;
+
+hset_t hset_new(int capacity) // O(1)
+//@requires capacity > 0; 
+//@ensures \result != NULL;
+;
+
+bool hset_contains(hset_t H, elem x) //O(1) avg.
+//@requires H!=NULL;
+;
+
+void hset_add(hset_t H, elem x) // O(a) avg.
+//@requires H!=NULL;
+//@ensures hset_contains(H,x);
+;

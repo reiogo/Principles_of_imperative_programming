@@ -1,0 +1,118 @@
+// Exercise 1
+
+typedef struct list_node genlist;
+
+struct list_node {
+    void* data;
+    string = tag;
+    genlist* next;
+};
+
+void print_linked_list (genlist* L)
+{
+    genlist* p = L;
+    while (p!=NULL){
+        if (string_equal(p->tag, "an_int")){
+            //@assert \hastag(int*,p->data);
+            printf("%d\n", *(int*)p->data);
+        } else if (string_equal(p->tag, "a_string")){
+            //@assert \hastag(string*,p->data);
+            printf("%s\n", *(string*)p->data);
+        } else {
+            printf("%s\n", p->tag);
+            error(" is an unknown tag");
+        }
+        p = p->next;
+    }
+}
+// Exercise 2
+
+typedef int int2int_fn(int n);
+
+// applies g then f to x
+int compose(int2int_fn* f, int2int_fn* g, int x)
+//@requires f != NULL && g != NULL;
+{
+    int tmp = (*g)(x);
+    return (*f)(tmp);
+}
+
+// applies functions of n-element array from left to right on x
+int pipeline(int2int_fn*[] F, int n, int x)
+//@requires \length(F) == n;
+{
+    int res = x;
+    for (int i = 0; i < n; i++)
+    //@loop_invariant 0 <= i && i <= n;
+    {
+        //assert F[i] != NULL;
+        res = (*F[i])(res);
+    }
+
+    return res;
+}
+
+// Exercise 3
+
+typedef struct pancakes pancakes;
+
+struct pancakes {
+    string type;
+    bool syrup;
+    int num
+}
+
+typedef struct eggs eggs;
+
+struct eggs {
+    string style;
+    int num;
+};
+
+typedef struct customer customer;
+
+struct customer {
+    string name;
+    void* breakfast;
+};
+
+int pancake_type(customer* C)
+//@requires \hastag(pancakes*, C->breakfast);
+{
+    pancakes* p = (pancakes*)(C->breakfast);
+    return p->type;
+}
+
+int num_eggs(customer* C)
+//@requires \hastag(eggs*, C->breakfast);
+{
+    eggs* e = (eggs*)(C->breakfast);
+    return e->num;
+}
+
+int main() {
+    customer*[] customers = alloc_array(customer*, 2);
+
+    eggs* janes = alloc(eggs);
+    janes->style = "scrambled";
+    janes->num = 3;
+
+    customers[0] = alloc(customer);
+    customers[0]->name = "Jane";
+    customers[0]->breakfast = (void*)janes;
+
+    pancakes* johns = alloc(pancakes);
+    johns->type = "blueberry";
+    johns->syrup = true;
+    johns->num = 2;
+
+    customers[1] = alloc(customer);
+    customers[1]->name = "John";
+    customers[1]->breakfast = (void*)johns;
+
+    int janes_egg_num = num_eggs(customer[0]);
+    
+    string johns_pancake_type = pancake_type(customer[1]);
+
+    return 0;
+}

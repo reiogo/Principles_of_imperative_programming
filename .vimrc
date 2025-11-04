@@ -301,3 +301,9 @@ augroup c0_files
     autocmd BufRead,BufNewFile *.c0 setfiletype c
     autocmd FileType c let b:ale_enabled = 0
 augroup END
+
+augroup c1_files
+    autocmd!
+    autocmd BufRead,BufNewFile *.c1 setfiletype c
+    autocmd FileType c let b:ale_enabled = 0
+augroup END

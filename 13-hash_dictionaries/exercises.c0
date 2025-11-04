@@ -344,5 +344,95 @@ void hdict_insert(hdict* H, key k, value v)
 
 // Exercise 7
 
+// Hash set
+
+// Client interface
+
+// typedef ______* hset_t;
+
+hset_t hset_new(int capacity) // O(1)
+//@requires capacity > 0; 
+//@ensures \result != NULL;
+;
+
+bool hset_contains(hset_t H, elem x) //O(1) avg.
+//@requires H!=NULL;
+;
+
+void hset_add(hset_t H, elem x) // O(a) avg.
+//@requires H!=NULL;
+//@ensures hset_contains(H,x);
+;
 
 
+
+// Hash set library inplementation:
+
+typedef struct chain_node chain;
+
+struct chain_node{
+    elem value; // != NULL
+    chain* next;
+};
+
+typedef struct hset_header hset;
+struct hset_header {
+    int size; // 0<=size
+    int capacity; // 0 < capacity
+    chain*[] table; // \length(table) == capacity
+};
+
+bool is_hset(hset* H)
+{
+    return is_hdict(H);
+}
+
+hset* hset_new(int capacity) // O(1)
+//@ensures is_hset(\result);
+{
+    hset* H = alloc(hset);
+    H->capacity = capacity;
+    H->size = 0;
+    H->table = alloc_array(chain*, capacity);
+    return H;
+}
+bool hset_contains(hset_t H, elem x) //O(1) avg.
+//@requires is_hset(H);
+{
+    int i = index_of_elem(H,x);
+
+    for (chain* p = H->table[i]; p != NULL; p = p->next)
+    
+        if (elem_equiv(p->data, x)){
+            return true;
+        }
+    }
+    return false;
+}
+
+int index_of_elem(hset* H, elem x)
+{
+    //not a main part of the exercise
+}
+
+
+void hset_add(hset* H, elem x) // O(a) avg.
+//@requires is_hset(H);
+//@ensures is_hset(H);
+//@ensures hset_contains(H, x);
+{
+    int i =  index_of_elem(H,x);
+    for (chain* p = H->table[i]; p != NULL; p = p->next)
+    {
+        if (elem_equiv(p->data, x)){
+            return;
+        }
+    }
+
+    chain* p = alloc(chain);
+    p->value = x;
+    p->next = H->table[i];
+    H->table[i] = p;
+    (H->size)++;
+     
+}

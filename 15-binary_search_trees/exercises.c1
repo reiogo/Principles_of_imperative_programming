@@ -1,0 +1,121 @@
+//Exercise 1
+//24,33,10,2,1,7,6
+//order it 1,2,6,7,10,24,33
+//7
+//2 24
+//1 6 10 33
+// I made it balanced by mistake it only needs to be ordered
+// 24,33,10,2,1,7,6
+
+//       24
+//       / \
+//      10 33
+//     /
+//    2
+//   / \
+//  1  7
+//    /
+//   6
+
+//Exercise 2
+
+// 2,8,10,11,12,13,14,15,17,20
+//
+//                       11
+//                      /   \
+//                     10    17
+//                    /      / \
+//                   2      13  20
+//                    \     / \
+//                     8   12 15
+//                            /
+//                           14 
+//
+// 11,10,17,2,8,13,20,12,15,14
+
+//Exercise 3
+
+//rewrite dict_lookup iteratively
+
+entry dict_lookup(dict* D, key k)
+//@requires is_dict(D);
+/*@ensures \result == NULL
+    || key_compare(entry_key(\result), k) == 0; @*/
+{
+    tree* P = D->root;
+    while (P != NULL)
+    {
+        int cmp = key_compare(k, entry_key(P->data));
+        if (cmp == 0) return P->data;
+        if (cmp < 0) P = P->left;
+        if (cmp > 0) P = P->right;
+    }
+
+    return NULL;
+}
+
+//Exercise 4
+
+
+tree* leaf()
+//@ensures \result != NULL;
+{
+    attach = alloc(tree);
+    attach->data = e;
+    attach->left = NULL;
+    attach->right = NULL;
+    return attach;
+}
+
+//rewrite dict_insert interatively
+void dict_insert(dict* D, entry e)
+//@requires is_dict(D) && e != NULL;
+/*@ensures is_dict(D)
+    && dict_lookup(D, entry_key(e)) != NULL;
+    @*/
+{
+    tree* P = D->root;
+
+    if (P == NULL) {
+        D->root = leaf();
+        return;
+    } 
+
+    int cmp = key_compare(entry_key(e), entry_key(P->data));
+    if (cmp == 0){
+        P->data = e;
+        D->root = P;
+    }
+    if (cmp < 0) P = P->left;
+    if (cmp > 0) P = P->right;
+
+    tree* trailing_p = D->root;
+
+    while (P != NULL)
+    {
+        cmp = key_compare(entry_key(e), entry_key(P->data));
+        if (cmp == 0){
+            P->data = e;
+            cmp_trailer = key_compare(entry_key(e), entry_key(trailing_p->data));
+            if (cmp_trailer < 0){
+                trailing_p->left = leaf();
+            } else if (cmp_trailer > 0){
+                //@assert cmp_trailer != 0;
+                trailing_p->right = leaf();
+            }
+        }
+        if (cmp < 0){
+            P = P->left;
+            trailing_p = trailing_p->left;
+        }
+        if (cmp > 0){ 
+            P = P->right;
+            trailing_p = trailing_p->right;
+        }
+    }
+}
+
+//Exercise 5
+
+
+

@@ -39,7 +39,7 @@
 
 entry dict_lookup(dict* D, key k)
 //@requires is_dict(D);
-/*@ensures \result == NULL
+/*@ensures \result == NULL;
     || key_compare(entry_key(\result), k) == 0; @*/
 {
     tree* P = D->root;
@@ -50,21 +50,22 @@ entry dict_lookup(dict* D, key k)
         if (cmp < 0) P = P->left;
         if (cmp > 0) P = P->right;
     }
-
+    //@assert P == NULL;
     return NULL;
 }
 
 //Exercise 4
 
 
-tree* leaf()
-//@ensures \result != NULL;
+tree* leaf(entry e)
+//@requires e != NULL;
+//@ensures is_bst(\result) && \result != NULL;
 {
-    attach = alloc(tree);
-    attach->data = e;
-    attach->left = NULL;
-    attach->right = NULL;
-    return attach;
+    leaf = alloc(tree);
+    leaf->data = e;
+    leaf->left = NULL;
+    leaf->right = NULL;
+    return leaf;
 }
 
 //rewrite dict_insert interatively
@@ -75,47 +76,188 @@ void dict_insert(dict* D, entry e)
     @*/
 {
     tree* P = D->root;
+    tree* trailing_p;
+    int cmp;
 
     if (P == NULL) {
-        D->root = leaf();
+        D->root = leaf(e);
         return;
     } 
 
-    int cmp = key_compare(entry_key(e), entry_key(P->data));
-    if (cmp == 0){
-        P->data = e;
-        D->root = P;
-    }
-    if (cmp < 0) P = P->left;
-    if (cmp > 0) P = P->right;
-
-    tree* trailing_p = D->root;
-
     while (P != NULL)
     {
+        trailing_p = P;
+
         cmp = key_compare(entry_key(e), entry_key(P->data));
         if (cmp == 0){
             P->data = e;
-            cmp_trailer = key_compare(entry_key(e), entry_key(trailing_p->data));
-            if (cmp_trailer < 0){
-                trailing_p->left = leaf();
-            } else if (cmp_trailer > 0){
-                //@assert cmp_trailer != 0;
-                trailing_p->right = leaf();
-            }
-        }
-        if (cmp < 0){
+            return;
+        } else if (cmp < 0){
             P = P->left;
-            trailing_p = trailing_p->left;
-        }
-        if (cmp > 0){ 
+        } else if (cmp > 0){ 
             P = P->right;
-            trailing_p = trailing_p->right;
         }
     }
+
+    //@assert P == NULL;
+    int trail_cmp = key_compare(entry_key(e), entry_key(trailing_p->data));
+    if (trail_cmp < 0){
+        trailing_p->left = leaf(e);
+    } else if (trail_cmp > 0){
+        trailing_p->right = leaf(e);
+    }
+    return;
 }
 
+// solutions from the lecture
+void dict_insert_v2(dict* D, entry e)
+//@requires is_dict(D) && e != NULL;
+//@ensures is_dict(D) && dict_lookup(D,entry_key(e)) != NULL;
+{
+    tree* T = D->root;
+    tree* parent = NULL;
+    int cmp = 0;
+    while (T != NULL) {
+        cmp = key_compare(entry_key(e), entry_key(T->data));
+        if (cmp == 0) {
+            T->data = e;
+            return;
+        }
+        parent = T;
+        if (cmp < 0)
+            T = T->left;
+        else { //@assert cmp > 0;
+            T = T->right;
+        }
+    }
+    //@assert T == NULL;
+    T = leaf(e);
+    if (parent == NULL)
+        D->root = T;
+    else if (cmp < 0)
+        parent->left = T;
+    else { //@assert cmp > 0;
+        parent->right = T;
+    }
+}
 //Exercise 5
 
+// implement bst set interface of section 9
+
+/* Client-side interface */
+
+// typedef ______ elem;
+
+int elem_compare(elem e1, elem e2)
+/*@ensures -1 <= \result && \result <= 1; @*/ ;
+
+/* Library interface */
+
+// typedef ______* set_t;
+
+set_t set_new()
+/*@ensures \result != NULL; @*/ ;
+
+bool set_contains(set_t S, elem e)
+/*@requires S != NULL; @*/ ;
+
+void set_insert(set_t S, elem e)
+/*@requires S != NULL; @*/
+/*@ensures set_contains(S, e); @*/ ;
+
+/* Library implementation */
+
+typedef struct tree_node tree;
+struct tree_node {
+    elem data;
+    tree* left;
+    tree* right;
+};
+
+typedef struct set_header set;
+
+struct set_header{
+    tree* root;
+};
+bool is_tree(tree* root)
+{
+    if (root == NULL) return true;
+    return is_tree(root->left) && is_tree(root->right);
+}
+bool is_ordered(tree* root, elem* lo, elem* hi)
+//@requires is_tree(T);
+{
+    if (T == NULL) return true;
+    elem e = T->data;
+    elem* lo_left = alloc(elem);
+    *lo_left = e;
+    elem* hi_right = alloc(elem);
+    *hi_right = e;
+    return (lo == NULL || elem_compare(*lo, e) < 0)
+        && (hi == NULL || elem_compare(e, *hi) < 0)
+        && is_ordered(T->left, lo, hi_right)
+        && is_ordered(T->right, lo_left, hi);
+}
+
+bool is_bst(tree* T){
+    return is_tree(T) && is_ordered(T, NULL, NULL);
+}
+
+bool bst_lookup(tree* T, elem e)
+//@requires is_bst(T);
+{
+    if(T == NULL) return false;
+
+    int cmp = elem_compare(e, T->data);
+
+    if (cmp == 0) return true;
+    if (cmp > 0) 
+        return bst_lookup(T->right, e);
+    else 
+        return bst_lookup(T->left, e);
+}
+
+tree* bst_insert(tree* T, elem e)
+//@requires is_bst(T);
+//@ensures is_bst(\result);
+//@ensures  bst_lookup(\result, e);
+{
+    if (T == NULL){
+        return leaf(e);
+    }
+    int cmp = elem_compare(e,T->data);
+    if (cmp == 0) T->data = e;
+    else if (cmp > 0) T->right = bst_insert(T->right, e);
+    else T->left = bst_insert(T->left, e);
+
+    return T;
+}
 
 
+bool is_set(set* S){
+    return is_bst(S->root)
+        && S != NULL;
+}
+
+set* set_new()
+//@ensures is_set(\result);
+{
+    set* S = alloc(set);
+    S->root = NULL;
+    return S;
+}
+
+bool set_contains(set* S, elem e)
+//@requires is_set(S);
+//@requires e != NULL;
+{
+    return bst_lookup(S, e);
+}
+
+void set_insert(set* S, elem e)
+//@requires is_set(S);
+//@ensures set_contains(S, e);
+{
+    S->root = bst_insert(S->root, e);
+}
+typedef set* set_t;

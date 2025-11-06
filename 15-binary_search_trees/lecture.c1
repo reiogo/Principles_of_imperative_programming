@@ -3,7 +3,7 @@ struct tree_node {
     entry data; // non NULL
     tree* left; 
     tree* right;
-}
+};
 
 
 // Client-side interface

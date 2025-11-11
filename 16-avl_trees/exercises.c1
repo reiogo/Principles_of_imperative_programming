@@ -1,0 +1,192 @@
+// Exercise 1
+
+// Node 16, 7
+
+// Exercise 2
+// Wrote on paper for ease.
+// Exercise 3
+// Wrote on paper for ease.
+// Exercise 4
+// Wrote on paper for ease.
+// Exercise 5
+// Wrote on paper for ease.
+// Exercise 6
+// Wrote on paper for ease.
+// Exercise 7
+
+// discussion of rotations in terms of height invariant
+// A. Height invariant is that no node has subtrees that differ by greater than 1.
+// After the first rotation, Y should have a left subtree that is at most h,
+// and X should have a right subtree that is at most h. by the second rotation
+// z has left Y and right X and both have the same height.
+
+// Solution: My answer is not quite right, but it has elements that are the correct
+// on intuition.
+
+// Second attempt: 
+//  In the beginning the left subtree of Y, the right subtree of X, one of the subtrees of Z has height h.
+//  The other subtree of Z might have h - 1. 
+//  On the first rotation of the subtree of the lowest violation (in this case X),
+//  Y had height of h, which now becomes height h + 1 (because subtree of Z potentially has h).
+//  Z has h + 2, which means it could potentially cause a violation.
+//  X has now h + 3, which remains the same as the before the rotation, implying that the rotation
+//  did not balance the tree. 
+//  On the second rotation, on the node that is the root of the subtree that was being handled in the first 
+//  rotation, Y and X both have height of h + 1. This means the height of Z is h+2 implying that 
+//  the tree is one less height of the original tree, and that both sides have the same height.
+//  This means the heigh invariant is preserved
+
+// Exercise 8
+
+// Use point to reasoning to show that avl_insert meets it's postconditions
+
+tree* avl_insert(tree* T, entry e)
+//@requires is_avl(T) && e != NULL;
+//@ensures is_avl(\result) && \result != NULL;
+//@ensures avl_lookup(\result, entry_key(e)) == e;
+{
+    if (T == NULL) return leaf(e);
+
+    //@assert is_avl(T->left);
+    //@assert is_avl(T->right);
+    int cmp = key_compare(entry_key(e), entry_key(T->data));
+    if (cmp == 0){ // Found
+        T->data = e;
+    } else if (cmp < 0) { //Go left
+        T->left  = avl_insert(T->left, e);
+        //@assert is_avl(T->left) && T->left != NULL;
+        T = rebalance_left(T);
+        //@assert is_avl(T);
+    } else if (cmp > 0) { // Go right
+        T->right = avl_insert(T->right, e);
+        //@assert is_avl(T->right && T->right != NULL;
+        T = rebalance_right(T);
+        //@assert is_avl(T);
+    }
+    return T;
+}
+
+// Show is_avl(\result) && \result != NULL
+// 1. Case: T == NULL, \result is leaf by line
+// 2. is_avl(leaf(e)) by postcondition of leaf()
+// 3. Case: cmp == 0, is_avl(\result) by precondition
+// 4. Case: cmp < 0, is_avl(\result) by assertion
+// 5. Case: cmp > 0, is_avl(\result) by assertion
+// 6. is_avl(\result) by 1,2, and 3,4,5
+// 7. \result != NULL by conditional (return leaf); 
+
+// show avl_lookup(\result, entry_key(e)) == e
+// 1. Case T == NULL: 
+//  a. T->data == e by leaf(e)
+//  b. avl_lookup(\result, entry_key(e)) == e by a
+// 2. Case cmp == 0:
+//  a. T->data == e by line
+//  b. avl_lookup(\result, entry_key(e)) == e by a
+// 3. Case cmp < 0
+//  a. avl_lookup(T->left,e) by line T->left assignment
+//  b. avl_lookup(\result, entry_key(e)) == e by a
+// 4. Case cmp > 0
+//  a. avl_lookup(T->right,e) by line T->right assignment
+//  b. avl_lookup(\result, entry_key(e)) == e by a
+// 5. avl_lookup(\result, entry_key(e)) == e by 1,2,3,4
+
+
+// Exercise 9
+
+// Strengthen the contracts of rotate for rebalance
+// Apparently the original contracts of rotate_left and rotate_right
+// are not strong enough to prove the correctness of rebalance_right
+
+// A. Neither of the rotate functions ensure that the resulting tree is 
+// balanced. Rotations don't guarantee that the tree is balanced.
+// (From the solutions:) but is_avl is a recursive property,
+// which means that it has to have subtrees that are already avl trees.
+
+
+tree* rotate_left(tree* T)
+//@requires T != NULL && T->right != NULL;
+//@requires is_specified_height(T->left);
+//@requires is_specified_height(T->right);
+//@requires is_avl(T->right) && is_avl(T->left);
+//@ensures is_avl(\result);
+//@ensures is_specified_height(\result);
+{
+    tree* R = T->right;
+    T->right = T->right->left;
+    R->left = T;
+    fix_height(T);
+    fix_height(R);
+    return R;
+}
+
+tree* rotate_right(tree* T)
+//@requires T != NULL && T->left != NULL;
+//@requires is_specified_height(T->left);
+//@requires is_specified_height(T->right);
+//@requires is_avl(T->right) && is_avl(T->left);
+//@ensures is_avl(\result);
+//@ensures is_specified_height(\result);
+{
+    tree* L = T->left;
+    T->left = T->left->right;
+    L->right = T;
+    fix_height(T);
+    fix_height(R);
+    return L;
+}
+
+tree* rebalance_right(tree* T)
+//@requires T != NULL && T->right != NULL;
+//@requires is_avl(T->left) && is_avl(T->right);
+//@ensures is_avl(\result);
+{
+    if (height(T->right) - height(T->left) == 2){
+        if (height (T->right->right) > height(T->right->left)) {
+            // Single rotation
+            T = rotate_left(T);
+        } else {
+            //@assert height(T->right->left) > height(T->right->right);
+            // Double rotation
+            T->right = rotate_right(T->right);
+            T = rotate_left(T);
+        }
+    } else {
+        // No rotation needed, but tree may have grown
+        fix_height(T);
+    }
+
+    return T;
+}
+
+
+// Exercise 10
+
+// The problem with the fix in exercise 9 is that the first rotation doesn't 
+// balance the tree. So the return tree from the first rotation is not an avl tree.
+// Proposed fix: Keep some sort of tracking of whether something is a two part rebalancing
+// or only needs one rotation?
+
+// Exercise 11
+
+// performs a right-left double rotation on T (without single rotations)
+rotate_right_left(tree* T)
+//@requires T != NULL && T->right != NULL && T->right->left != NULL;
+//@requires is_avl(T->right) && is_avl(T->left);
+//@requires is_specified_height(T->left);
+//@requires is_specified_height(T->right);
+//@ensures is_specified_height(\result);
+//@ensures is_avl(\result);
+{
+    tree* grandchild = T->right->left;
+
+    T->right->left = grandchild->right;
+    grandchild->right = T->right;
+    T->right = grandchild->left;
+    grandchild->left = T;
+
+    fix_height(grandchild->right);
+    fix_height(grandchild->left);
+    fix_height(grandchild);
+
+    return grandchild;
+}

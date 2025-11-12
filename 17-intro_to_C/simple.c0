@@ -1,0 +1,23 @@
+#use <util>
+
+// Interface 
+
+int absval(int x)
+//@requires x > int_min();
+//@ensures \result >= 0;
+;
+
+struct point2d {
+    int x;
+    int y;
+};
+
+
+// Implementation
+int absval(int x)
+//@requires x > int_min();
+//@ensures \result >= 0;
+{
+    int res = x < 0 ? -x : x;
+    return res;
+}

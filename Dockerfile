@@ -7,6 +7,7 @@ RUN apt update && apt install -y \
     curl \
     git \
     tmux \
+    valgrind \
     vim
 
 # Set terminal environment variable for proper color detection

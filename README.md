@@ -57,6 +57,7 @@ cc0 test.c0
 ./a.out
 
 # Or use interpreter
+# coin does not accept c1 files
 coin -d test.c0
 ```
 

@@ -1,0 +1,118 @@
+typedef struct list_node list;
+struct list_node {
+    elem data;
+    list* next;
+}
+
+bool is_segment(list* start, list* end){
+    if (start == NULL) return false;
+    if (start == end) return true;
+    return is_segment(start->next, end);
+}
+
+bool is_acyclic(list* start){
+    if (start == NULL) return true;
+    list* h = start->next;
+    list* t = start;
+
+    while (h != t) {
+        if (h == NULL || h->next == NULL) return true;
+        h = h->next->next;
+        //@assert t != NULL;
+        t = t->next;
+    }
+    //@assert h == t;
+    return false;
+}
+
+typedef struct queue_header queue;
+struct queue_header {
+    list* front;
+    list* back;
+}
+
+typedef queue* queue_t;
+
+bool is_queue(queue* Q)
+{
+    return Q != NULL
+        && is_acyclic(Q->front)
+        && is_segment(Q->front, Q->back);
+}
+
+bool queue_empty(queue* Q)
+    //@requires is_queue(Q);
+{
+    return Q->front == Q->back;
+}
+
+queue* queue_new()
+//@ensures is_queue(\result);
+//@ensures queue_empty(\result);
+{
+    queue* Q = alloc(queue);
+    list* dummy = alloc(list);
+    Q->front = dummy;
+    Q->back = dummy;
+    return Q;
+}
+
+void enq(queue* Q, elem x)
+//@requires is_queue(Q);
+//@ensures is_queue(Q);
+{
+    list* new_dummy = alloc(list);
+    Q->back->data = x;
+    Q->back->next = new_dummy;
+    Q->back = new_dummy;
+}
+
+elem deq(queue* Q)
+//@requires is_queue(Q);
+//@requires !queue_empty(Q);
+//@ensures is_queue(Q);
+{
+    elem x = Q->front->data;
+    Q->front = Q->front->next;
+    return x;
+}
+
+typedef struct stack_header stack;
+struct stack_header {
+    list* top;
+    list* floor;
+}
+
+bool is_stack (stack* S){
+    return S != NULL
+        && is_acyclic(S->top)
+        && is_segment(S->top,S->floor);
+}
+
+bool stack_empty(stack* S)
+//@requires is_stack(s);
+{
+    return S->top == S->floor;
+}
+
+elem pop(stack* S) 
+//@requires is_stack(S);
+//@requires !stack_empty(S);
+//@ensures is_stack(S);
+{
+    elem x = S->top->data;
+    S->top = S->top->next;
+    return x;
+}
+
+void push(stack* S, elem x)
+//@requires is_stack(S);
+//@ensures is_stack(S);
+{
+    list* p = alloc(list);
+    p->data = x;
+    p->next = S->top;
+    S->top = p;
+}
+
+typedef stack* stack_t;

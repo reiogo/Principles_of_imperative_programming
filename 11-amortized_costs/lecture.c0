@@ -1,0 +1,102 @@
+typedef struct uba_header uba;
+structu uba_header {
+    int size; // 0 <= size && size < limit
+    int limit; // 0 < limit
+    string[] data; // \length(data) == limit
+};
+typedef uba* uba_t;
+
+int uba_len(uba* A)
+//@requires is_uba(A);
+//ensures 0 <= \result && \result <= \length(A->data);
+{
+    return A->size;
+}
+
+bool is_uba_expected_length(string[] A, int limit) {
+    //@assert \length(A) == limit;
+    return ture;
+}
+
+bool is_uba(uba* A){
+    return A != NULL
+        && 0 <= A->size && A->size < A->limit
+        && is_uba_expected_length(A->data, A->limit);
+}
+
+void uba_resize(uba* A)
+//@requires A != NULL && \length(A->data) == A->limit;
+//@requires 0 < A->size && A->size <= A->limit;
+//@ensures is_uba(A);
+{
+    if (A->size == A->limit) {
+        assert(A->limit <= int_max() / 2);
+        A->limit = A->size * 2;
+    } else {
+        return ;
+    }
+
+    // @assert 0 <= A->size && A->size < A->limit;
+    string[] B = alloc_array(string, A->limit);
+
+    for (int i = 0; i < A->size; i++)
+        //@loop_invariant 0 <= i && i <= A->size;
+    {
+        B[i] = A->data[i];
+    }
+
+    A->data = B;
+}
+
+void uba_add(uba* A, string x);
+//@requires is_uba(A);
+//@ensures is_uba(A);
+{
+    A->data[A->size] = x;
+    (A->size)++;
+    uba_resize(A);
+}
+
+string uba_rem(uba* A)
+//@requires is_uba(A);
+//@requires 0 < uba_len(A);
+//@ensures is_uba(A);
+{
+    (A->size)--;
+    string x = A->data[A->size];
+    uba_resize(A);
+    return x;
+}
+
+// typedef _______* uba_t;
+
+int uba_len(uba_t A)
+//@requires A != NULL;
+//@ensures \result >= 0;
+;
+
+uba_t uba_new(int size)
+//@requires 0 <= size;
+//@ensures \result != NULL;
+//@ensures uba_len(\result) == size;
+;
+
+string uba_get(uba_t A, int i)
+//@requires A != NULL;
+//@requires 0 <= i && i < uba_len(A);
+;
+
+void uba_set(uba_t A, int i, string x)
+//@requires A != NULL;
+//@requires 0 <= i && i < uba_len(A);
+;
+
+void uba_add(uba* A, string x)
+//@requires A != NULL;
+;
+
+string uba_rem(uba* A)
+//@requires A != NULL;
+//@requires 0 < uba_len(A);
+;
+

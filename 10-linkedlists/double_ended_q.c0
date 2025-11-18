@@ -1,0 +1,149 @@
+#use <conio>
+#use <util>
+
+// Implementation
+
+typedef struct list_node node;
+struct list_node {
+    int data;
+    node* prev;
+    node* next;
+};
+
+typedef struct double_queue_header dq;
+struct double_queue_header {
+    node* front;
+    node* back;
+};
+
+void dq_print_unsafe(dq* D){
+
+    node* t = D->front;
+    while (t != D->back){
+        printf("%d \n",t->data);
+        t = t->next;
+    }
+}
+
+
+bool is_segment(node* start, node* end)
+{
+    if (end == NULL) return false;
+    if (start == end) {
+        return true;
+    } else {
+        return start != NULL && is_segment(start->next,end);
+    }
+}
+
+/* bool is_acyclic(node* start, node* end) */
+/* //@requires start != NULL && end != NULL; */
+/* { */
+/*     node* t = start; */
+/*     node* h = start->next; */
+
+/*     while (t != h) */
+/*     //@loop_invariant is_segment(t,h); */
+/*     //@loop_invariant is_segment(t->next,h); */
+/*     { */
+/*         if (h == end || h->next == end) return true; */
+/*         //@assert t != end; */
+/*         t = t->next; */
+/*         h = h->next->next; */
+/*     } */
+    
+/*     return false; */
+/* } */
+
+bool is_acyclic_segment(node* start, node* end){
+    if (start == NULL || end == NULL) return false;
+
+    node* t = start;
+    node* h = start->next;
+
+    while (t != h)
+    //@loop_invariant is_segment(t,h);
+    //@loop_invariant is_segment(t->next,h);
+    {
+        if (h == NULL || h->next == NULL) return false;
+        if (h == end || h->next == end) return true;
+        //@assert t != end && t!= NULL;
+        t = t->next;
+        h = h->next->next;
+    }
+    
+    return false;
+}
+
+bool is_dq(dq* D)
+{
+    return D != NULL
+        && is_acyclic_segment(D->front, D->back);
+}
+
+
+void dq_print_internal(dq* D) 
+//@requires is_dq(D);
+{
+    dq_print_unsafe(D);
+}
+
+bool dq_empty(dq* D)
+//@requires is_dq(D);
+{
+    return D->front == D->back;
+}
+
+dq* dq_new(){
+    dq* D = alloc(dq);
+    node* t = alloc(node);
+    D->front = t;
+    D->back = t;
+    return D;
+}
+
+void enq(dq* D, int x)
+//@requires is_dq(D);
+//@ensures is_dq(D);
+//@ensures !dq_empty(D);
+{
+    node* new = alloc(node);
+    new->data = x;
+    new->prev = D->back;
+    D->back->next = new;
+    D->back = new;
+}
+
+int deq(dq* D) 
+//@requires is_dq(D);
+//@requires !dq_empty(D);
+//@ensures is_dq(D);
+{
+    int res = D->front->data;
+    D->front = D->front->next;
+    return res;
+}
+
+
+// Client abstract type 
+typedef dq* dq_t;
+
+// Interface
+
+//typedef _________ dq_t;
+
+dq_t dq_new()
+//@ensures dq_empty(\result);
+;
+
+bool dq_empty(dq_t D);
+
+
+void enq(dq_t D, int x)
+//@ensures !dq_empty(D);
+;
+
+int deq(dq_t D)
+//@requires !dq_empty(D);
+;
+

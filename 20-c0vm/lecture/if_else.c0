@@ -1,0 +1,16 @@
+int local(int a){
+    int b = a;
+    if (b > 5){
+        b += 10;
+    } else {
+        b -= 5;
+    }
+    
+    return b;
+}
+
+int main(){
+    int c = local(4);
+    return c;
+
+}

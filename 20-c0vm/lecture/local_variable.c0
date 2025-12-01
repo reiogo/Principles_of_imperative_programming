@@ -1,0 +1,10 @@
+int local(int a){
+    int b = a;
+    return b;
+}
+
+int main(){
+    local(4);
+    return 0;
+
+}

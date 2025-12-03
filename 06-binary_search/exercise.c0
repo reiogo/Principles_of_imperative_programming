@@ -12,10 +12,16 @@ int binsearch(int x, int[] A, int n)
     int lo = 0;
     int hi = n;
     while (lo < hi)
+<<<<<<< HEAD
         //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
         //@loop_invariant (lo == 0 || A[lo - 1] < x);
         //@loop_invariant (hi == n || A[hi] > x);
 >>>>>>> fc5b0c6 (Add from 3-6)
+=======
+    //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
+    //@loop_invariant (lo == 0 || A[lo - 1] < x);
+    //@loop_invariant (hi == n || A[hi] > x);
+>>>>>>> 1b1ebea (I'm confused what's happening here but committing)
     {
         int mid = lo + (hi - lo)/2;
         //@assert lo <= mid && mid < hi;
@@ -62,10 +68,16 @@ int binsearchV2(int x, int[] A, int n)
     int lo = 0;
     int hi = n - 1;
     while (lo <= hi)
+<<<<<<< HEAD
         //@loop_invariant 0 <= lo && lo <= hi + 1 && hi + 1 <= n;
         //@loop_invariant gt_seg(x,A,0,lo);
         //@loop_invariant lt_seg(x,A,hi+1,n);
 >>>>>>> fc5b0c6 (Add from 3-6)
+=======
+    //@loop_invariant 0 <= lo && lo <= hi + 1 && hi + 1 <= n;
+    //@loop_invariant gt_seg(x,A,0,lo);
+    //@loop_invariant lt_seg(x,A,hi+1,n);
+>>>>>>> 1b1ebea (I'm confused what's happening here but committing)
     {
         int mid = lo + (hi - lo) /2;
         //@assert lo <= mid && mid <= hi;
@@ -143,10 +155,14 @@ int binsearchV2(int x, int[] A, int n)
 //    a. 0 <= (hi-lo)/2 by math on loop guard
 //    b. lo <= lo + (hi-lo)/2 by math on a
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 1b1ebea (I'm confused what's happening here but committing)
 //    c. (hi - lo)/2 <= (hi - lo) by math
 //    d. lo + (hi - lo)/2 <= hi by math on c
 //    e. 0 <= lo + (hi-lo)/2 <= hi
 //    f. 0 <= mid <= hi
+<<<<<<< HEAD
 //   A2
 //    a. A[mid] != x by line
 //    b. A[mid] <= x by line
@@ -155,6 +171,12 @@ int binsearchV2(int x, int[] A, int n)
 //   A2
 //    a. I've done this proof before and I don't mind skipping it
 >>>>>>> fc5b0c6 (Add from 3-6)
+=======
+//   A2
+//    a. A[mid] != x by line
+//    b. A[mid] <= x by line
+//    c. A[mid] < x by a and c
+>>>>>>> 1b1ebea (I'm confused what's happening here but committing)
 //   A3
 //    a. lo > hi by loop guard failing
 //    b. lo <= hi + 1 by loop invariant
@@ -191,6 +213,9 @@ int testbinsearchV2(){
     return 0;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 1b1ebea (I'm confused what's happening here but committing)
 
 //Exercise 2 ==========================================================
 
@@ -489,5 +514,8 @@ int testbinsearchV4(){
 // PRES
 //  trivially preserved
 // The termination fails which means the exit also fails
+<<<<<<< HEAD
 =======
 >>>>>>> fc5b0c6 (Add from 3-6)
+=======
+>>>>>>> 1b1ebea (I'm confused what's happening here but committing)

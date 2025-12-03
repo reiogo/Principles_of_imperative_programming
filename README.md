@@ -58,7 +58,13 @@ cc0 test.c0
 
 # Or use interpreter
 <<<<<<< HEAD
+<<<<<<< HEAD
 # coin does not accept c1 files
 =======
+=======
+# coin does not accept c1 files
+coin -d test.c0
+```
+>>>>>>> 1b1ebea (I'm confused what's happening here but committing)
 
 

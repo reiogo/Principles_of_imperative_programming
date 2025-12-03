@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Principles of Imperative Programming (CS15122 at CMU)
 ![proofs](https://img.shields.io/badge/proofs-verified-blue)
 ![language](https://img.shields.io/badge/language-C0%2FCC0-lightgrey)

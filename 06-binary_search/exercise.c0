@@ -12,9 +12,10 @@ int binsearch(int x, int[] A, int n)
     int lo = 0;
     int hi = n;
     while (lo < hi)
-    //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
-    //@loop_invariant (lo == 0 || A[lo - 1] < x);
-    //@loop_invariant (hi == n || A[hi] > x);
+        //@loop_invariant 0 <= lo && lo <= hi && hi <= n;
+        //@loop_invariant (lo == 0 || A[lo - 1] < x);
+        //@loop_invariant (hi == n || A[hi] > x);
+>>>>>>> fc5b0c6 (Add from 3-6)
     {
         int mid = lo + (hi - lo)/2;
         //@assert lo <= mid && mid < hi;
@@ -61,9 +62,10 @@ int binsearchV2(int x, int[] A, int n)
     int lo = 0;
     int hi = n - 1;
     while (lo <= hi)
-    //@loop_invariant 0 <= lo && lo <= hi + 1 && hi + 1 <= n;
-    //@loop_invariant gt_seg(x,A,0,lo);
-    //@loop_invariant lt_seg(x,A,hi+1,n);
+        //@loop_invariant 0 <= lo && lo <= hi + 1 && hi + 1 <= n;
+        //@loop_invariant gt_seg(x,A,0,lo);
+        //@loop_invariant lt_seg(x,A,hi+1,n);
+>>>>>>> fc5b0c6 (Add from 3-6)
     {
         int mid = lo + (hi - lo) /2;
         //@assert lo <= mid && mid <= hi;
@@ -140,6 +142,7 @@ int binsearchV2(int x, int[] A, int n)
 //   A1
 //    a. 0 <= (hi-lo)/2 by math on loop guard
 //    b. lo <= lo + (hi-lo)/2 by math on a
+<<<<<<< HEAD
 //    c. (hi - lo)/2 <= (hi - lo) by math
 //    d. lo + (hi - lo)/2 <= hi by math on c
 //    e. 0 <= lo + (hi-lo)/2 <= hi
@@ -148,6 +151,10 @@ int binsearchV2(int x, int[] A, int n)
 //    a. A[mid] != x by line
 //    b. A[mid] <= x by line
 //    c. A[mid] < x by a and c
+=======
+//   A2
+//    a. I've done this proof before and I don't mind skipping it
+>>>>>>> fc5b0c6 (Add from 3-6)
 //   A3
 //    a. lo > hi by loop guard failing
 //    b. lo <= hi + 1 by loop invariant
@@ -183,6 +190,7 @@ int testbinsearchV2(){
 
     return 0;
 }
+<<<<<<< HEAD
 
 //Exercise 2 ==========================================================
 
@@ -481,3 +489,5 @@ int testbinsearchV4(){
 // PRES
 //  trivially preserved
 // The termination fails which means the exit also fails
+=======
+>>>>>>> fc5b0c6 (Add from 3-6)

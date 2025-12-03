@@ -7,6 +7,7 @@ This repository contains exercises, implementations, and proofs inspired by the 
 
 **Note:** This is a personal study repository.
 
+Using CMU's interpreter: coin, or compiling the program with CMU's compiler: cc0.
 
 ---
 
